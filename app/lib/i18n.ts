@@ -1,7 +1,7 @@
 import type {I18nBase} from '@shopify/hydrogen';
 
 export function getLocaleFromRequest(request: Request): I18nBase {
-  const defaultLocale: I18nBase = {language: 'EN', country: 'US'};
+  const defaultLocale: I18nBase = {language: 'DE', country: 'DE'};
   const supportedLocales = {
     ES: 'ES',
     FR: 'FR',

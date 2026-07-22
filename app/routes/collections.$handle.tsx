@@ -7,7 +7,10 @@ import {ProductItem} from '~/components/ProductItem';
 import type {ProductItemFragment} from 'storefrontapi.generated';
 
 export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: `Hydrogen | ${data?.collection.title ?? ''} Collection`}];
+  return [
+    {title: `${data?.collection.seo?.title || data?.collection.title || 'Produkte'} | Phoenix`},
+    {name: 'description', content: data?.collection.seo?.description || data?.collection.description?.slice(0, 160) || ''},
+  ];
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -140,6 +143,10 @@ const COLLECTION_QUERY = `#graphql
       handle
       title
       description
+      seo {
+        title
+        description
+      }
       products(
         first: $first,
         last: $last,

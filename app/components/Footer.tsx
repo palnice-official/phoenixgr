@@ -1,6 +1,7 @@
 import {Suspense} from 'react';
 import {Await, NavLink} from 'react-router';
 import type {FooterQuery, HeaderQuery} from 'storefrontapi.generated';
+import {config} from '~/lib/config';
 
 interface FooterProps {
   footer: Promise<FooterQuery | null>;
@@ -18,13 +19,29 @@ export function Footer({
       <Await resolve={footerPromise}>
         {(footer) => (
           <footer className="footer">
-            {footer?.menu && header.shop.primaryDomain?.url && (
-              <FooterMenu
-                menu={footer.menu}
-                primaryDomainUrl={header.shop.primaryDomain.url}
-                publicStoreDomain={publicStoreDomain}
-              />
+            <div className="footer-brand">
+              <strong>Phoenix</strong>
+              <p>Reines Wasser. Natürlich.</p>
+              <a href={`mailto:${config.contactEmail}`}>{config.contactEmail}</a>
+              <a href={`tel:${config.contactPhone.replace(/\s/g, '')}`}>
+                {config.contactPhone}
+              </a>
+            </div>
+            {header.shop.primaryDomain?.url && (
+              <div className="footer-menus">
+                <FooterMenu
+                  menu={footer?.menu ?? null}
+                  primaryDomainUrl={header.shop.primaryDomain.url}
+                  publicStoreDomain={publicStoreDomain}
+                />
+                <FooterMenu
+                  menu={footer?.secondMenu ?? null}
+                  primaryDomainUrl={header.shop.primaryDomain.url}
+                  publicStoreDomain={publicStoreDomain}
+                />
+              </div>
             )}
+            <small>© {new Date().getFullYear()} Phoenix Water Filters</small>
           </footer>
         )}
       </Await>
@@ -37,7 +54,7 @@ function FooterMenu({
   primaryDomainUrl,
   publicStoreDomain,
 }: {
-  menu: FooterQuery['menu'];
+  menu: FooterQuery['menu'] | FooterQuery['secondMenu'];
   primaryDomainUrl: FooterProps['header']['shop']['primaryDomain']['url'];
   publicStoreDomain: string;
 }) {
@@ -47,7 +64,6 @@ function FooterMenu({
         if (!item.url) return null;
         // if the url is internal, we strip the domain
         const url =
-          item.url.includes('myshopify.com') ||
           item.url.includes(publicStoreDomain) ||
           item.url.includes(primaryDomainUrl)
             ? new URL(item.url).pathname
@@ -74,42 +90,42 @@ function FooterMenu({
 }
 
 const FALLBACK_FOOTER_MENU = {
-  id: 'gid://shopify/Menu/199655620664',
+  id: 'fallback-footer',
   items: [
     {
-      id: 'gid://shopify/MenuItem/461633060920',
-      resourceId: 'gid://shopify/ShopPolicy/23358046264',
+      id: 'impressum',
+      resourceId: null,
       tags: [],
-      title: 'Privacy Policy',
-      type: 'SHOP_POLICY',
-      url: '/policies/privacy-policy',
+      title: 'Impressum',
+      type: 'PAGE',
+      url: '/pages/impressum',
       items: [],
     },
     {
-      id: 'gid://shopify/MenuItem/461633093688',
-      resourceId: 'gid://shopify/ShopPolicy/23358013496',
+      id: 'widerruf',
+      resourceId: null,
       tags: [],
-      title: 'Refund Policy',
-      type: 'SHOP_POLICY',
-      url: '/policies/refund-policy',
+      title: 'Widerrufsbelehrung',
+      type: 'PAGE',
+      url: '/pages/widerrufsbelehrung',
       items: [],
     },
     {
-      id: 'gid://shopify/MenuItem/461633126456',
-      resourceId: 'gid://shopify/ShopPolicy/23358111800',
+      id: 'datenschutz',
+      resourceId: null,
       tags: [],
-      title: 'Shipping Policy',
-      type: 'SHOP_POLICY',
-      url: '/policies/shipping-policy',
+      title: 'Datenschutzerklärung',
+      type: 'PAGE',
+      url: '/pages/datenschutzerklaerung',
       items: [],
     },
     {
-      id: 'gid://shopify/MenuItem/461633159224',
-      resourceId: 'gid://shopify/ShopPolicy/23358079032',
+      id: 'agb',
+      resourceId: null,
       tags: [],
-      title: 'Terms of Service',
-      type: 'SHOP_POLICY',
-      url: '/policies/terms-of-service',
+      title: 'AGB',
+      type: 'PAGE',
+      url: '/pages/agb',
       items: [],
     },
   ],

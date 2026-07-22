@@ -72,7 +72,6 @@ export function HeaderMenu({
 
         // if the url is internal, we strip the domain
         const url =
-          item.url.includes('myshopify.com') ||
           item.url.includes(publicStoreDomain) ||
           item.url.includes(primaryDomainUrl)
             ? new URL(item.url).pathname
@@ -176,42 +175,42 @@ function CartBanner() {
 }
 
 const FALLBACK_HEADER_MENU = {
-  id: 'gid://shopify/Menu/199655587896',
+  id: 'fallback-header',
   items: [
     {
-      id: 'gid://shopify/MenuItem/461609500728',
+      id: 'all-products',
       resourceId: null,
       tags: [],
-      title: 'Collections',
+      title: 'Alle Produkte',
       type: 'HTTP',
       url: '/collections',
       items: [],
     },
     {
-      id: 'gid://shopify/MenuItem/461609533496',
+      id: 'reviews',
       resourceId: null,
       tags: [],
-      title: 'Blog',
+      title: 'Bewertungen',
       type: 'HTTP',
-      url: '/blogs/journal',
+      url: '/pages/bewertungen',
       items: [],
     },
     {
-      id: 'gid://shopify/MenuItem/461609566264',
+      id: 'faq',
       resourceId: null,
       tags: [],
-      title: 'Policies',
+      title: 'FAQ',
       type: 'HTTP',
-      url: '/policies',
+      url: '/pages/faq',
       items: [],
     },
     {
-      id: 'gid://shopify/MenuItem/461609599032',
-      resourceId: 'gid://shopify/Page/92591030328',
+      id: 'about',
+      resourceId: null,
       tags: [],
-      title: 'About',
+      title: 'Über uns',
       type: 'PAGE',
-      url: '/pages/about',
+      url: '/pages/ueber-uns',
       items: [],
     },
   ],

@@ -3,6 +3,7 @@ import {
   type ReactNode,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 import {useId} from 'react';
@@ -36,35 +37,61 @@ export function Aside({
   const {type: activeType, close} = useAside();
   const expanded = type === activeType;
   const id = useId();
+  const dialogRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const abortController = new AbortController();
+    const previouslyFocused = document.activeElement as HTMLElement | null;
 
     if (expanded) {
+      const focusable = () =>
+        Array.from(
+          dialogRef.current?.querySelectorAll<HTMLElement>(
+            'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+          ) ?? [],
+        );
+      focusable()[0]?.focus();
       document.addEventListener(
         'keydown',
         function handler(event: KeyboardEvent) {
           if (event.key === 'Escape') {
             close();
           }
+          if (event.key === 'Tab') {
+            const items = focusable();
+            const first = items[0];
+            const last = items.at(-1);
+            if (event.shiftKey && document.activeElement === first) {
+              event.preventDefault();
+              last?.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+              event.preventDefault();
+              first?.focus();
+            }
+          }
         },
         {signal: abortController.signal},
       );
     }
-    return () => abortController.abort();
+    return () => {
+      abortController.abort();
+      if (expanded) previouslyFocused?.focus();
+    };
   }, [close, expanded]);
 
   return (
     <div
       aria-modal
+      aria-hidden={!expanded}
       className={`overlay ${expanded ? 'expanded' : ''}`}
+      ref={dialogRef}
       role="dialog"
       aria-labelledby={id}
     >
-      <button className="close-outside" onClick={close} />
+      <button className="close-outside" onClick={close} aria-label="Schließen" />
       <aside>
         <header>
           <h3 id={id}>{heading}</h3>
-          <button className="close reset" onClick={close} aria-label="Close">
+          <button className="close reset" onClick={close} aria-label="Schließen">
             &times;
           </button>
         </header>

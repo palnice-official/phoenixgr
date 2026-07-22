@@ -4,6 +4,7 @@ import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/Aside';
 import {CartLineItem, type CartLine} from '~/components/CartLineItem';
 import {CartSummary} from './CartSummary';
+import {FreeShippingBar} from './FreeShippingBar';
 
 export type CartLayout = 'page' | 'aside';
 
@@ -52,9 +53,14 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
   return (
     <section
       className={className}
-      aria-label={layout === 'page' ? 'Cart page' : 'Cart drawer'}
+      aria-label={layout === 'page' ? 'Warenkorbseite' : 'Warenkorb'}
     >
       <CartEmpty hidden={linesCount} layout={layout} />
+      {cartHasItems && (
+        <FreeShippingBar
+          subtotal={Number(cart?.cost?.subtotalAmount?.amount ?? 0)}
+        />
+      )}
       <div className="cart-details">
         <p id="cart-lines" className="sr-only">
           Line items

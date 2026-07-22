@@ -16,8 +16,25 @@ import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
 import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import {PageLayout} from './components/PageLayout';
+import {ConsentAnalytics} from './components/ConsentAnalytics';
+import {getEnvConfig} from './lib/config';
 
 export type RootLoader = typeof loader;
+
+export const meta: Route.MetaFunction = ({data, location}) => {
+  const canonicalDomain = data?.canonicalDomain?.replace(/\/$/, '');
+  return [
+    {title: 'Phoenix Wasserfiltersysteme Deutschland'},
+    {
+      name: 'description',
+      content:
+        'Edelstahl-Schwerkraft-Wasserfilter für reines Trinkwasser – ohne Strom und ohne Wasseranschluss.',
+    },
+    ...(canonicalDomain
+      ? [{tagName: 'link', rel: 'canonical', href: `${canonicalDomain}${location.pathname}`}]
+      : []),
+  ];
+};
 
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
@@ -73,11 +90,14 @@ export async function loader(args: Route.LoaderArgs) {
   const criticalData = await loadCriticalData(args);
 
   const {storefront, env} = args.context;
+  const envConfig = getEnvConfig(env);
 
   return {
     ...deferredData,
     ...criticalData,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
+    canonicalDomain: envConfig.canonicalDomain,
+    gtmId: envConfig.gtmId,
     shop: getShopAnalytics({
       storefront,
       publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
@@ -85,7 +105,7 @@ export async function loader(args: Route.LoaderArgs) {
     consent: {
       checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
       storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
-      withPrivacyBanner: false,
+      withPrivacyBanner: true,
       // localize the privacy banner
       country: args.context.storefront.i18n.country,
       language: args.context.storefront.i18n.language,
@@ -126,7 +146,8 @@ function loadDeferredData({context}: Route.LoaderArgs) {
     .query(FOOTER_QUERY, {
       cache: storefront.CacheLong(),
       variables: {
-        footerMenuHandle: 'footer', // Adjust to your footer menu handle
+        footerMenuHandle: 'footer-menu-1',
+        footerMenuSecondHandle: 'footer-menu-2',
       },
     })
     .catch((error: Error) => {
@@ -145,7 +166,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
   const nonce = useNonce();
 
   return (
-    <html lang="en">
+    <html lang="de">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -179,31 +200,24 @@ export default function App() {
       <PageLayout {...data}>
         <Outlet />
       </PageLayout>
+      <ConsentAnalytics gtmId={data.gtmId} />
     </Analytics.Provider>
   );
 }
 
 export function ErrorBoundary() {
   const error = useRouteError();
-  let errorMessage = 'Unknown error';
   let errorStatus = 500;
 
   if (isRouteErrorResponse(error)) {
-    errorMessage = error?.data?.message ?? error.data;
     errorStatus = error.status;
-  } else if (error instanceof Error) {
-    errorMessage = error.message;
   }
 
   return (
     <div className="route-error">
-      <h1>Oops</h1>
+      <h1>{errorStatus === 404 ? 'Seite nicht gefunden' : 'Etwas ist schiefgelaufen'}</h1>
       <h2>{errorStatus}</h2>
-      {errorMessage && (
-        <fieldset>
-          <pre>{errorMessage}</pre>
-        </fieldset>
-      )}
+      <a href="/">Zur Startseite</a>
     </div>
   );
 }

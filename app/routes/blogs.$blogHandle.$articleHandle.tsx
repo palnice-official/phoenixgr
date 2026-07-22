@@ -4,7 +4,7 @@ import {Image} from '@shopify/hydrogen';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 
 export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: `Hydrogen | ${data?.article.title ?? ''} article`}];
+  return [{title: `${data?.article.seo?.title || data?.article.title || 'Artikel'} | Phoenix`}];
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -69,7 +69,7 @@ export default function Article() {
   const {article} = useLoaderData<typeof loader>();
   const {title, image, contentHtml, author} = article;
 
-  const publishedDate = new Intl.DateTimeFormat('en-US', {
+  const publishedDate = new Intl.DateTimeFormat('de-DE', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

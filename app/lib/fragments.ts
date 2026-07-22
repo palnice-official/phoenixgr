@@ -232,9 +232,13 @@ export const FOOTER_QUERY = `#graphql
   query Footer(
     $country: CountryCode
     $footerMenuHandle: String!
+    $footerMenuSecondHandle: String!
     $language: LanguageCode
   ) @inContext(language: $language, country: $country) {
-    menu(handle: $footerMenuHandle) {
+    menu: menu(handle: $footerMenuHandle) {
+      ...Menu
+    }
+    secondMenu: menu(handle: $footerMenuSecondHandle) {
       ...Menu
     }
   }

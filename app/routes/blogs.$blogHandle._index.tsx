@@ -6,7 +6,7 @@ import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 
 export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: `Hydrogen | ${data?.blog.title ?? ''} blog`}];
+  return [{title: `${data?.blog.title ?? 'Ratgeber'} | Phoenix`}];
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -89,7 +89,7 @@ function ArticleItem({
   article: ArticleItemFragment;
   loading?: HTMLImageElement['loading'];
 }) {
-  const publishedAt = new Intl.DateTimeFormat('en-US', {
+  const publishedAt = new Intl.DateTimeFormat('de-DE', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

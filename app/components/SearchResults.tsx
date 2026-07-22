@@ -1,6 +1,7 @@
 import {Link} from 'react-router';
 import {Image, Money, Pagination} from '@shopify/hydrogen';
 import {urlWithTrackingParams, type RegularSearchReturn} from '~/lib/search';
+import {t} from '~/lib/t';
 
 type SearchItems = RegularSearchReturn['result']['items'];
 type PartialSearchResult<ItemType extends keyof SearchItems> = Pick<
@@ -40,7 +41,7 @@ function SearchResultsArticles({
 
   return (
     <div className="search-result">
-      <h2>Articles</h2>
+      <h2>Artikel</h2>
       <div>
         {articles?.nodes?.map((article) => {
           const articleUrl = urlWithTrackingParams({
@@ -70,7 +71,7 @@ function SearchResultsPages({term, pages}: PartialSearchResult<'pages'>) {
 
   return (
     <div className="search-result">
-      <h2>Pages</h2>
+      <h2>Seiten</h2>
       <div>
         {pages?.nodes?.map((page) => {
           const pageUrl = urlWithTrackingParams({
@@ -103,7 +104,7 @@ function SearchResultsProducts({
 
   return (
     <div className="search-result">
-      <h2>Products</h2>
+      <h2>Produkte</h2>
       <Pagination connection={products}>
         {({nodes, isLoading, NextLink, PreviousLink}) => {
           const ItemsMarkup = nodes.map((product) => {
@@ -125,6 +126,7 @@ function SearchResultsProducts({
                   <div>
                     <p>{product.title}</p>
                     <small>{price && <Money data={price} />}</small>
+                    <small>{t.price.taxNote} {t.price.taxNoteShippingWord}</small>
                   </div>
                 </Link>
               </div>
@@ -135,7 +137,7 @@ function SearchResultsProducts({
             <div>
               <div>
                 <PreviousLink>
-                  {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
+                  {isLoading ? 'Wird geladen …' : <span>↑ Zurück</span>}
                 </PreviousLink>
               </div>
               <div>
@@ -144,7 +146,7 @@ function SearchResultsProducts({
               </div>
               <div>
                 <NextLink>
-                  {isLoading ? 'Loading...' : <span>Load more ↓</span>}
+                  {isLoading ? 'Wird geladen …' : <span>Mehr laden ↓</span>}
                 </NextLink>
               </div>
             </div>
@@ -157,5 +159,5 @@ function SearchResultsProducts({
 }
 
 function SearchResultsEmpty() {
-  return <p>No results, try a different search.</p>;
+  return <p>{t.search.noResults}</p>;
 }

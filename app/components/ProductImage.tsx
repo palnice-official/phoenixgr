@@ -1,23 +1,65 @@
+import {useState} from 'react';
 import type {ProductVariantFragment} from 'storefrontapi.generated';
 import {Image} from '@shopify/hydrogen';
 
-export function ProductImage({
-  image,
-}: {
+type GalleryImage = {
+  id?: string | null;
+  url: string;
+  altText?: string | null;
+  width?: number | null;
+  height?: number | null;
+};
+
+type ProductImageProps = {
   image: ProductVariantFragment['image'];
-}) {
-  if (!image) {
-    return <div className="product-image" />;
+  images?: GalleryImage[];
+};
+
+export function ProductImage({image, images}: ProductImageProps) {
+  const allImages = images?.length ? images : image ? [image] : [];
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const currentImage = allImages[selectedIndex] ?? image;
+
+  if (!currentImage) {
+    return <div className="product-image-empty" />;
   }
+
   return (
-    <div className="product-image">
-      <Image
-        alt={image.altText || 'Product Image'}
-        aspectRatio="1/1"
-        data={image}
-        key={image.id}
-        sizes="(min-width: 45em) 50vw, 100vw"
-      />
+    <div className="product-gallery">
+      {/* Thumbnails */}
+      {allImages.length > 1 && (
+        <div className="product-gallery-thumbs">
+          {allImages.map((img, index) => (
+            <button
+              key={img.id}
+              className={`product-gallery-thumb ${
+                index === selectedIndex ? 'active' : ''
+              }`}
+              onClick={() => setSelectedIndex(index)}
+              aria-label={`Bild ${index + 1}`}
+            >
+              <Image
+                alt={img.altText || `Vorschaubild ${index + 1}`}
+                aspectRatio="1/1"
+                data={img}
+                sizes="80px"
+                loading="lazy"
+              />
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Main image */}
+      <div className="product-gallery-main">
+        <Image
+          alt={currentImage.altText || 'Produktbild'}
+          data={currentImage}
+          key={currentImage.id}
+          sizes="(min-width: 45em) 50vw, 100vw"
+        />
+      </div>
     </div>
   );
 }

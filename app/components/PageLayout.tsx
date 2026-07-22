@@ -14,6 +14,8 @@ import {
   SearchFormPredictive,
 } from '~/components/SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
+import {AnnouncementBar} from '~/components/AnnouncementBar';
+import {t} from '~/lib/t';
 
 interface PageLayoutProps {
   cart: Promise<CartApiQueryFragment | null>;
@@ -37,6 +39,7 @@ export function PageLayout({
       <CartAside cart={cart} />
       <SearchAside />
       <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
+      <AnnouncementBar messages={[...t.announcement.items]} />
       {header && (
         <Header
           header={header}
@@ -57,8 +60,8 @@ export function PageLayout({
 
 function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
   return (
-    <Aside type="cart" heading="CART">
-      <Suspense fallback={<p>Loading cart ...</p>}>
+    <Aside type="cart" heading={t.cart.title}>
+      <Suspense fallback={<p>Warenkorb wird geladen …</p>}>
         <Await resolve={cart}>
           {(cart) => {
             return <CartMain cart={cart} layout="aside" />;
@@ -72,7 +75,7 @@ function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
 function SearchAside() {
   const queriesDatalistId = useId();
   return (
-    <Aside type="search" heading="SEARCH">
+    <Aside type="search" heading={t.nav.search}>
       <div className="predictive-search">
         <br />
         <SearchFormPredictive>
@@ -82,13 +85,14 @@ function SearchAside() {
                 name="q"
                 onChange={fetchResults}
                 onFocus={fetchResults}
-                placeholder="Search"
+                placeholder={t.search.placeholder}
+                aria-label={t.nav.search}
                 ref={inputRef}
                 type="search"
                 list={queriesDatalistId}
               />
               &nbsp;
-              <button onClick={goToSearch}>Search</button>
+              <button onClick={goToSearch}>{t.nav.search}</button>
             </>
           )}
         </SearchFormPredictive>
@@ -98,7 +102,7 @@ function SearchAside() {
             const {articles, collections, pages, products, queries} = items;
 
             if (state === 'loading' && term.current) {
-              return <div>Loading...</div>;
+              return <div>Wird geladen …</div>;
             }
 
             if (!total) {
@@ -137,7 +141,7 @@ function SearchAside() {
                     to={`${SEARCH_ENDPOINT}?q=${term.current}`}
                   >
                     <p>
-                      View all results for <q>{term.current}</q>
+                      Alle Ergebnisse für <q>{term.current}</q>
                       &nbsp; →
                     </p>
                   </Link>
@@ -161,7 +165,7 @@ function MobileMenuAside({
   return (
     header.menu &&
     header.shop.primaryDomain?.url && (
-      <Aside type="mobile" heading="MENU">
+      <Aside type="mobile" heading={t.nav.menu}>
         <HeaderMenu
           menu={header.menu}
           viewport="mobile"

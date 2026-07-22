@@ -3,18 +3,15 @@ import {Image, Money} from '@shopify/hydrogen';
 import type {
   ProductItemFragment,
   CollectionItemFragment,
-  RecommendedProductFragment,
 } from 'storefrontapi.generated';
 import {useVariantUrl} from '~/lib/variants';
+import {t} from '~/lib/t';
 
 export function ProductItem({
   product,
   loading,
 }: {
-  product:
-    | CollectionItemFragment
-    | ProductItemFragment
-    | RecommendedProductFragment;
+  product: CollectionItemFragment | ProductItemFragment;
   loading?: 'eager' | 'lazy';
 }) {
   const variantUrl = useVariantUrl(product.handle);
@@ -38,6 +35,10 @@ export function ProductItem({
       <h4>{product.title}</h4>
       <small>
         <Money data={product.priceRange.minVariantPrice} />
+      </small>
+      <small className="product-price-tax-note">
+        {t.price.taxNote}{' '}
+        <span>{t.price.taxNoteShippingWord}</span>
       </small>
     </Link>
   );
