@@ -1,8 +1,10 @@
 import {useState} from 'react';
+import {RichText} from '@shopify/hydrogen';
 
 interface AccordionItem {
   title: string;
-  content: string;
+  content?: string;
+  richText?: string;
 }
 
 export function ProductAccordion({items}: {items: AccordionItem[]}) {
@@ -35,12 +37,13 @@ function AccordionItemComponent({item}: {item: AccordionItem}) {
           </span>
         </button>
       </h3>
-      <div
-        className="product-accordion-content"
-        role="region"
-        hidden={!open}
-        dangerouslySetInnerHTML={{__html: item.content}}
-      />
+      <div className="product-accordion-content" role="region" hidden={!open}>
+        {item.richText ? (
+          <RichText data={item.richText} />
+        ) : (
+          <div dangerouslySetInnerHTML={{__html: item.content || ''}} />
+        )}
+      </div>
     </div>
   );
 }

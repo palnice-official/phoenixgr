@@ -15,13 +15,16 @@ export const t = {
   },
 
   nav: {
+    home: 'Startseite',
     shop: 'Alle Produkte',
     system: 'Filtersystem',
     reviews: 'Bewertungen',
     faq: 'FAQ',
     account: 'Konto',
+    signIn: 'Anmelden',
     search: 'Suche',
     cart: 'Warenkorb',
+    cartCount: (count: number) => `${count} Artikel`,
     menu: 'Menü',
   },
 
@@ -37,8 +40,14 @@ export const t = {
   cart: {
     title: 'Ihr Warenkorb',
     empty: 'Ihr Warenkorb ist leer',
+    emptyPrompt: 'Sie haben noch keine Produkte hinzugefügt.',
+    lineItems: 'Warenkorbpositionen',
+    childLineItems: (product: string) =>
+      `Zusätzliche Positionen für ${product}`,
     subtotal: 'Zwischensumme',
     remove: 'Entfernen',
+    removeGiftCard: (lastCharacters: string) =>
+      `Geschenkgutschein mit der Endung ${lastCharacters} entfernen`,
     quantity: 'Menge',
     freeShippingRemaining: (amount: string) =>
       `Nur noch ${amount} bis zum kostenlosen Versand!`,
@@ -71,15 +80,35 @@ export const t = {
     },
     accordions: {
       description: 'Beschreibung',
+      specifications: 'Technische Daten',
       contents: 'Lieferumfang',
       shipping: 'Versand',
       faq: 'Häufige Fragen',
+    },
+    gallery: {
+      imagesLabel: 'Produktbilder',
+      image: (index: number) => `Bild ${index}`,
+      thumbnail: (index: number) => `Vorschaubild ${index}`,
+      showImage: (index: number) => `Bild ${index} anzeigen`,
+      productImage: 'Produktbild',
+      previous: 'Vorheriges Produktbild',
+      next: 'Nächstes Produktbild',
     },
     stickyBar: {
       cta: 'Jetzt bestellen',
     },
     rating: (count: number) => `Basierend auf ${count} Bewertungen`,
     ratingLink: 'Bewertungen ansehen',
+    marketBadge: 'Für deutsche Wasserbedingungen entwickelt',
+    intro:
+      'Reines, wohlschmeckendes Wasser ohne Strom, Installation oder festen Wasseranschluss. Das langlebige Edelstahlgehäuse und die leistungsstarken Filterelemente machen sauberes Trinkwasser im Alltag besonders einfach.',
+    shippingEstimate: 'Versand innerhalb von 3–5 Werktagen',
+    unavailableMessage: 'Diese Variante ist derzeit nicht verfügbar.',
+    purchaseOptions: {
+      heading: 'Kaufoptionen',
+      oneTime: 'Einmaliger Kauf',
+      note: 'Abonnements können jederzeit angepasst, pausiert oder gekündigt werden.',
+    },
   },
 
   hero: {

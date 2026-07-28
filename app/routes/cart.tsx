@@ -3,6 +3,7 @@ import type {Route} from './+types/cart';
 import type {CartQueryDataReturn} from '@shopify/hydrogen';
 import {CartForm} from '@shopify/hydrogen';
 import {CartMain} from '~/components/CartMain';
+import {t} from '~/lib/t';
 
 export const meta: Route.MetaFunction = () => {
   return [{title: 'Warenkorb | Phoenix'}];
@@ -106,7 +107,7 @@ export default function Cart() {
 
   return (
     <div className="cart">
-      <h1>Cart</h1>
+      <h1>{t.nav.cart}</h1>
       <CartMain layout="page" cart={cart} />
     </div>
   );

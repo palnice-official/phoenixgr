@@ -5,14 +5,20 @@ interface Step {
   order: number;
 }
 
-export function ThreeSteps({steps}: {steps: Step[]}) {
+export function ThreeSteps({
+  steps,
+  heading = "So einfach geht's",
+}: {
+  steps: Step[];
+  heading?: string;
+}) {
   if (!steps.length) return null;
 
   return (
     <section className="bg-surface px-5 py-16 md:py-24">
       <div className="mx-auto max-w-5xl">
         <h2 className="mb-10 text-center font-display text-3xl font-bold text-brand-dark md:text-4xl">
-          So einfach geht&apos;s
+          {heading}
         </h2>
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
@@ -20,11 +26,7 @@ export function ThreeSteps({steps}: {steps: Step[]}) {
             <div key={step.title} className="text-center">
               <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-brand-blue">
                 {step.icon ? (
-                  <img
-                    src={step.icon}
-                    alt=""
-                    className="h-10 w-10"
-                  />
+                  <img src={step.icon} alt="" className="h-10 w-10" />
                 ) : (
                   <span className="text-3xl font-bold text-white">
                     {step.order || index + 1}

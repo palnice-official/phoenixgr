@@ -1,34 +1,54 @@
 import {Link} from 'react-router';
 import {t} from '~/lib/t';
 import {config} from '~/lib/config';
+import type {ReactNode} from 'react';
 
-export function GuaranteeSection({imageUrl}: {imageUrl?: string}) {
+export function GuaranteeSection({
+  imageUrl,
+  imageAlt = '100 Tage Geld-zurück-Garantie',
+  heading = '100 Tage Geld-zurück-Garantie',
+  body,
+  termsLink,
+}: {
+  imageUrl?: string;
+  imageAlt?: string;
+  heading?: string;
+  body?: ReactNode;
+  termsLink?: string;
+}) {
   return (
     <section className="bg-white px-5 py-16 md:py-24">
       <div className="mx-auto max-w-5xl">
         <div className="flex flex-col items-center gap-12 md:flex-row">
           {/* Image */}
-          {imageUrl && <div className="w-full md:w-1/2">
-            <div className="relative aspect-square overflow-hidden rounded-2xl">
-              <img
-                src={imageUrl}
-                alt="100 Tage Geld-zurück-Garantie"
-                className="h-full w-full object-cover"
-              />
+          {imageUrl && (
+            <div className="w-full md:w-1/2">
+              <div className="relative aspect-square overflow-hidden rounded-2xl">
+                <img
+                  src={imageUrl}
+                  alt={imageAlt}
+                  className="h-full w-full object-cover"
+                />
+              </div>
             </div>
-          </div>}
+          )}
 
           {/* Content */}
           <div className="w-full md:w-1/2">
             <h2 className="mb-6 font-display text-3xl font-bold text-brand-dark md:text-4xl">
-              100 Tage Geld-zurück-Garantie
+              {heading}
             </h2>
-            <p className="mb-6 text-lg leading-relaxed text-neutral-600">
-              Wir sind so überzeugt von der Qualität unseres Wasserfilters, dass
-              wir Ihnen eine uneingeschränkte 100-Tage-Geld-zurück-Garantie
-              bieten. Testen Sie den Phoenix ohne Risiko — wenn Sie nicht
-              zufrieden sind, erstatten wir Ihnen den vollen Kaufpreis.
-            </p>
+            <div className="mb-6 text-lg leading-relaxed text-neutral-600">
+              {body || (
+                <p>
+                  Wir sind so überzeugt von der Qualität unseres Wasserfilters,
+                  dass wir Ihnen eine uneingeschränkte
+                  100-Tage-Geld-zurück-Garantie bieten. Testen Sie den Phoenix
+                  ohne Risiko — wenn Sie nicht zufrieden sind, erstatten wir
+                  Ihnen den vollen Kaufpreis.
+                </p>
+              )}
+            </div>
             <ul className="mb-8 space-y-3">
               <li className="flex items-start gap-3">
                 <svg
@@ -91,6 +111,11 @@ export function GuaranteeSection({imageUrl}: {imageUrl?: string}) {
             >
               {t.cta.tryRiskFree}
             </Link>
+            {termsLink && (
+              <Link className="ml-4 text-sm underline" to={termsLink}>
+                Garantiebedingungen
+              </Link>
+            )}
           </div>
         </div>
       </div>

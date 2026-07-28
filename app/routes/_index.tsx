@@ -6,6 +6,7 @@ import {FeatureSplit} from '~/components/FeatureSplit';
 import {FeatureGrid} from '~/components/FeatureGrid';
 import {ImpactCalculator} from '~/components/ImpactCalculator';
 import {ComparisonTable} from '~/components/ComparisonTable';
+import {HowItWorks} from '~/components/HowItWorks';
 import {ThreeSteps} from '~/components/ThreeSteps';
 import {GuaranteeSection} from '~/components/GuaranteeSection';
 import {ReviewsCarousel} from '~/components/ReviewsCarousel';
@@ -228,7 +229,7 @@ export default function Homepage() {
       <FeatureSplit
         imageSide="left"
         heading="Innovation trifft Reinheit"
-        body="Entdecken Sie die Zukunft der Wasserfiltration. Der Phoenix Schwerkraft-Wasserfilter ist nicht nur ein Produkt — er ist ein Erlebnis, gefertigtem aus hochwertigem Edelstahl AISI 304 für Langlebigkeit und Eleganz. Jeder Tropfen Wassers ist ein Symbol für Reinheit."
+        body="Entdecken Sie die Zukunft der Wasserfiltration. Der Phoenix Schwerkraft-Wasserfilter ist nicht nur ein Produkt — er ist ein Erlebnis, gefertigt aus hochwertigem Edelstahl AISI 304 für Langlebigkeit und Eleganz. Jeder Tropfen Wasser ist ein Symbol für Reinheit."
         cta={{
           text: 'Jetzt bestellen',
           href: `/products/${config.productHandle}`,
@@ -258,7 +259,7 @@ export default function Homepage() {
       {/* 5. Affordable beauty */}
       <FeatureSplit
         imageSide="left"
-        heading=" beeindruckend im Design, unglaublich erschwinglich"
+        heading="Beeindruckend im Design, unglaublich erschwinglich"
         body="Ganze-Haus-Filterlösungen kosten oft 150 € bis über 500 € und erfordern teuren Wartungsservice. Flaschenwasser verursacht hohe jährliche Kosten und verschwendet Lagerplatz. Der Phoenix Gravity Filter bietet eine elegante Lösung — reines Wasser für nur 8 Cent pro Liter. Einfach zu installieren, einfach zu warten."
         imageSrc={productImages[1]?.url || productImages[0]?.url}
         imageAlt="Phoenix Wasserfilter Erschwinglichkeit"
@@ -279,7 +280,10 @@ export default function Homepage() {
       {/* 8. Lab reports / third-party testing */}
       <LabReports reports={metaobjects.labReports} />
 
-      {/* 9. Comparison table */}
+      {/* 9. How it works */}
+      <HowItWorks />
+
+      {/* 10. Comparison table */}
       <ComparisonTable rows={metaobjects.comparisonRows} />
 
       {/* 10. Three steps */}

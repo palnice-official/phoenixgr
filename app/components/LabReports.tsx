@@ -4,14 +4,20 @@ interface LabReport {
   pdf: string;
 }
 
-export function LabReports({reports}: {reports: LabReport[]}) {
+export function LabReports({
+  reports,
+  heading = 'Laborberichte & Zertifizierungen',
+}: {
+  reports: LabReport[];
+  heading?: string;
+}) {
   if (!reports.length) return null;
 
   return (
     <section className="bg-white px-5 py-16 md:py-24">
       <div className="mx-auto max-w-5xl">
         <h2 className="mb-10 text-center font-display text-3xl font-bold text-brand-dark md:text-4xl">
-          Laborberichte & Zertifizierungen
+          {heading}
         </h2>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">

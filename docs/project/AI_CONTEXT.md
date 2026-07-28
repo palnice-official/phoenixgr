@@ -56,10 +56,10 @@ export const config = {
   freeShippingThresholdEUR: 99,
   currency: 'EUR',
   locale: 'de-DE',
-  contactEmail: 'support@PLACEHOLDER.de',          // TODO
-  contactPhone: '+49 000 0000000',                 // TODO
-  gtmId: '',                                        // from env: PUBLIC_GTM_ID
-  reviewProvider: 'judgeme',                        // DECIDED 2026-07-17
+  contactEmail: 'support@PLACEHOLDER.de', // TODO
+  contactPhone: '+49 000 0000000', // TODO
+  gtmId: '', // from env: PUBLIC_GTM_ID
+  reviewProvider: 'judgeme', // DECIDED 2026-07-17
 };
 ```
 
@@ -72,57 +72,63 @@ Optional media vars: `PUBLIC_HERO_VIDEO_URL`, `PUBLIC_HERO_POSTER_URL`.
 ## 4. Shopify admin data model (must exist in dev AND prod with identical handles)
 
 ### 4.1 Product
-| Field | Value |
-|---|---|
-| Handle | `the-phoenix-gravity-wasserfilter` |
-| Variants | `8L`, `12L` (option name: `Größe`) |
-| Pricing | `price` + `compareAtPrice` set (drives strike-through + −% badge) |
-| Media | Product gallery images (reuse existing CDN assets) |
+
+| Field    | Value                                                             |
+| -------- | ----------------------------------------------------------------- |
+| Handle   | `the-phoenix-gravity-wasserfilter`                                |
+| Variants | `8L`, `12L` (option name: `Größe`)                                |
+| Pricing  | `price` + `compareAtPrice` set (drives strike-through + −% badge) |
+| Media    | Product gallery images (reuse existing CDN assets)                |
 
 ### 4.2 Navigation menus (handles are contract — do not rename)
-| Handle | Items |
-|---|---|
-| `main-menu` | Alle Produkte (collection), Filtersystem (product), Bewertungen (page), FAQ (page) |
-| `footer-menu-1` | Shop, So funktioniert's, Über uns, Kontakt, Installation, FAQ, Händler werden |
+
+| Handle          | Items                                                                                                                                    |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `main-menu`     | Alle Produkte (collection), Filtersystem (product), Bewertungen (page), FAQ (page)                                                       |
+| `footer-menu-1` | Shop, So funktioniert's, Über uns, Kontakt, Installation, FAQ, Händler werden                                                            |
 | `footer-menu-2` | Versand & Rückgabe, Datenschutzerklärung, Freunde werben, AGB, Laborberichte (file URL), Produktregistrierung, Impressum, Widerruf, Blog |
 
 ### 4.3 Pages (type: standard Shopify pages, rendered by `pages.$handle.tsx`)
+
 `faq`, `bewertungen`, `ueber-uns`, `kontakt`, `so-funktionierts`,
 `installation`, `versand-und-rueckgabe`, `datenschutzerklaerung`, `agb`,
 `impressum`, `widerrufsbelehrung`, `produktregistrierung`, `freunde-werben`.
 
 ### 4.4 Blog
+
 Handle: `wasserqualitaet` (articles authored in admin).
 
 ### 4.5 Metaobject definitions
-| Type | Fields | Used by |
-|---|---|---|
-| `announcement` | `text` (single line), `order` (int) | Announcement marquee |
-| `feature_item` | `icon` (file ref), `text` (single line), `group` (`perfection` \| `trust`) | "Designed for perfection" grid; cart trust row |
-| `comparison_row` | `label`, `phoenix` (bool), `other_systems` (bool), `bottled` (bool), `pitchers` (bool) | Comparison table |
-| ~~`review`~~ | — | Not needed: reviews come from **Judge.me** (see §9a) |
-| `step_item` | `icon` (file), `title`, `body`, `order` | 3-step section |
-| `box_item` | `text` | "What's in the box" list |
-| `lab_report` | `image` (file), `label`, `pdf` (file ref) | Lab reports section |
+
+| Type             | Fields                                                                                 | Used by                                              |
+| ---------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `announcement`   | `text` (single line), `order` (int)                                                    | Announcement marquee                                 |
+| `feature_item`   | `icon` (file ref), `text` (single line), `group` (`perfection` \| `trust`)             | "Designed for perfection" grid; cart trust row       |
+| `comparison_row` | `label`, `phoenix` (bool), `other_systems` (bool), `bottled` (bool), `pitchers` (bool) | Comparison table                                     |
+| ~~`review`~~     | —                                                                                      | Not needed: reviews come from **Judge.me** (see §9a) |
+| `step_item`      | `icon` (file), `title`, `body`, `order`                                                | 3-step section                                       |
+| `box_item`       | `text`                                                                                 | "What's in the box" list                             |
+| `lab_report`     | `image` (file), `label`, `pdf` (file ref)                                              | Lab reports section                                  |
 
 ### 4.6 Files (Settings → Files)
+
 Hero video mp4 + poster jpg, lab report PDFs (German), all section icons
 (SVG), guarantee/warranty images, payment icons if static.
 
 ## 5. Route map (Remix file routes)
 
-| Route file | Purpose |
-|---|---|
-| `_index.tsx` | Homepage (all sections below) |
-| `products.$handle.tsx` | Product detail page |
-| `collections.$handle.tsx` | Collection grid (`all-products`) |
-| `pages.$handle.tsx` | CMS pages incl. legal |
-| `blogs.$blogHandle._index.tsx` / `...$articleHandle.tsx` | Blog |
-| `cart.tsx` | Cart route (drawer is primary UI) |
-| `search.tsx` | Search |
-| `policies.*` | Shopify policies |
-| `account.*` | Customer accounts (skeleton default, new customer accounts) |
-| `[robots.txt].tsx`, `[sitemap.xml].tsx` | SEO (skeleton default) |
+| Route file                                               | Purpose                                                     |
+| -------------------------------------------------------- | ----------------------------------------------------------- |
+| `_index.tsx`                                             | Homepage (all sections below)                               |
+| `products.$handle.tsx`                                   | Product detail page                                         |
+| `collections.$handle.tsx`                                | Collection grid (`all-products`)                            |
+| `pages.$handle.tsx`                                      | CMS pages incl. legal                                       |
+| `blogs.$blogHandle._index.tsx` / `...$articleHandle.tsx` | Blog                                                        |
+| `cart.tsx`                                               | Cart route (drawer is primary UI)                           |
+| `search.tsx`                                             | Search                                                      |
+| `policies.*`                                             | Shopify policies                                            |
+| `account.*`                                              | Customer accounts (skeleton default, new customer accounts) |
+| `[robots.txt].tsx`, `[sitemap.xml].tsx`                  | SEO (skeleton default)                                      |
 
 ## 6. Homepage section order & component spec
 
@@ -133,7 +139,7 @@ Render order in `_index.tsx` (each is a component in `app/components/`):
    Erfahrung · Sale-Banner). Duplicated track + `@keyframes` translateX;
    pauses on hover; `aria-hidden` on the duplicate.
 2. **`HeroVideo`** — full-viewport background `<video autoPlay muted loop
-   playsInline poster>`; overlay: eyebrow line, H1 (serif italic accent on the
+playsInline poster>`; overlay: eyebrow line, H1 (serif italic accent on the
    last word, matching FR style: large white headline over video), star-rating
    link to reviews page, live price block (price, struck compare-at, −% badge,
    `inkl. MwSt.` note), primary CTA → product page, checkmark trust line
@@ -188,7 +194,7 @@ Render order in `_index.tsx` (each is a component in `app/components/`):
 
 - Two-column desktop: gallery (thumbnails + main image, zoom optional) left;
   buy box right: title, rating link, price block with compare-at + `inkl.
-  MwSt., zzgl. Versand`, variant selector (Größe: 8L/12L) via
+MwSt., zzgl. Versand`, variant selector (Größe: 8L/12L) via
   `getProductOptions`/`VariantSelector`, quantity stepper, `CartForm`
   LinesAdd (opens cart drawer on success), trust checkmarks, accordions
   (Beschreibung / Lieferumfang / Versand / FAQ) using `descriptionHtml`.
@@ -202,7 +208,7 @@ Render order in `_index.tsx` (each is a component in `app/components/`):
   `getReviewSummary(env)` calling the Judge.me REST API
   (`https://judge.me/api/v1/...`) using env vars:
   `JUDGEME_PRIVATE_TOKEN` (server-only, never in the client bundle) and
-  `JUDGEME_SHOP_DOMAIN` (myshopify domain of the *currently linked* store —
+  `JUDGEME_SHOP_DOMAIN` (myshopify domain of the _currently linked_ store —
   changes at cutover).
 - Fail soft: on any API error return `[]` / `null`; the reviews section hides
   itself. **Never render fabricated ratings or counts.**
@@ -212,6 +218,26 @@ Render order in `_index.tsx` (each is a component in `app/components/`):
   queries; pass plain data to `<ReviewsCarousel/>` (client-safe component).
 
 ## 9. Analytics, SEO, consent
+
+### PDP dynamic-data contract
+
+- Product options come directly from Shopify variants; never hardcode sizes,
+  filter types, stands, prices, availability, or variant ids.
+- Variant gallery metafield: namespace `custom`, key `gallery`, type
+  `list.file_reference` restricted to images and exposed to Storefront. When it
+  is empty, render the product media gallery.
+- Subscription choices come from each variant's Storefront
+  `sellingPlanAllocations`. Persist the selected plan in the `selling_plan`
+  query parameter and send its id on the cart line. If Appstle returns no
+  allocations, show one-time purchase only rather than inventing plan data.
+- Product long-form content comes from `custom.pdp_sections`, an ordered list of
+  mixed references to allowlisted `pdp_*` section metaobjects. React owns the
+  layouts; Shopify owns copy, media, referenced items, and section order. See
+  `docs/project/PDP_CONTENT.md` for the exact Admin schema.
+- Variant `custom.specifications` (rich text) and
+  `custom.filtration_steps` (list of `step_item` references) override only their
+  corresponding product-level content. Static German templates remain the
+  fallback while Shopify content is incomplete.
 
 - `Analytics.Provider` (Hydrogen built-in) wired in `root.tsx` with cart data.
 - GTM loaded **only after consent** via Customer Privacy API; container id from
@@ -232,6 +258,7 @@ Type:    Headings: serif (e.g. 'Playfair Display' or brand font) with italic
 Radius:  buttons pill (9999px) or 8px — match FR look. Buttons uppercase,
          letter-spacing wide.
 ```
+
 Extend `tailwind.config.ts` with these tokens; never use raw hex in components.
 
 ## 11. Commands

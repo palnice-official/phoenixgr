@@ -54,6 +54,12 @@ export const CART_QUERY_FRAGMENT = `#graphql
         }
       }
     }
+    sellingPlanAllocation {
+      sellingPlan {
+        id
+        name
+      }
+    }
     parentRelationship {
       parent {
         id
@@ -111,6 +117,12 @@ export const CART_QUERY_FRAGMENT = `#graphql
     }
     lineComponents {
       ...CartLine
+    }
+    sellingPlanAllocation {
+      sellingPlan {
+        id
+        name
+      }
     }
   }
   fragment CartApiQuery on Cart {
@@ -208,7 +220,10 @@ export const HEADER_QUERY = `#graphql
     brand {
       logo {
         image {
+          altText
+          height
           url
+          width
         }
       }
     }

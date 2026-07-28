@@ -14,15 +14,20 @@ import {ProductPrice} from './ProductPrice';
 export function ProductForm({
   productOptions,
   selectedVariant,
+  selectedSellingPlanId = null,
+  onSellingPlanChange,
 }: {
   productOptions: MappedProductOptions[];
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
+  selectedSellingPlanId?: string | null;
+  onSellingPlanChange?: (sellingPlanId: string | null) => void;
 }) {
   const navigate = useNavigate();
   const {open} = useAside();
   const [quantity, setQuantity] = useState(1);
 
   const isAvailable = selectedVariant?.availableForSale ?? false;
+  const sellingPlans = selectedVariant?.sellingPlanAllocations.nodes ?? [];
 
   return (
     <div className="product-form">
@@ -92,6 +97,53 @@ export function ProductForm({
         );
       })}
 
+      {!!sellingPlans.length && onSellingPlanChange && (
+        <fieldset className="product-purchase-options">
+          <legend>Kaufoption</legend>
+          <label
+            aria-label="Einmaliger Kauf"
+            htmlFor="purchase-option-once"
+            className={`product-purchase-option ${!selectedSellingPlanId ? 'selected' : ''}`}
+          >
+            <input
+              id="purchase-option-once"
+              type="radio"
+              name="purchase-option"
+              checked={!selectedSellingPlanId}
+              onChange={() => onSellingPlanChange(null)}
+            />
+            <span>
+              <strong>Einmaliger Kauf</strong>
+              <small>Keine wiederkehrende Lieferung</small>
+            </span>
+          </label>
+          {sellingPlans.map(({sellingPlan}) => (
+            <label
+              aria-label={sellingPlan.name}
+              htmlFor={`purchase-option-${sellingPlan.id}`}
+              className={`product-purchase-option ${
+                selectedSellingPlanId === sellingPlan.id ? 'selected' : ''
+              }`}
+              key={sellingPlan.id}
+            >
+              <input
+                id={`purchase-option-${sellingPlan.id}`}
+                type="radio"
+                name="purchase-option"
+                checked={selectedSellingPlanId === sellingPlan.id}
+                onChange={() => onSellingPlanChange(sellingPlan.id)}
+              />
+              <span>
+                <strong>{sellingPlan.name}</strong>
+                {sellingPlan.description && (
+                  <small>{sellingPlan.description}</small>
+                )}
+              </span>
+            </label>
+          ))}
+        </fieldset>
+      )}
+
       <ProductPrice
         price={selectedVariant?.price}
         compareAtPrice={selectedVariant?.compareAtPrice}
@@ -141,6 +193,7 @@ export function ProductForm({
                 {
                   merchandiseId: selectedVariant.id,
                   quantity,
+                  sellingPlanId: selectedSellingPlanId || undefined,
                   selectedVariant,
                 },
               ]

@@ -1,4 +1,9 @@
-import {redirect, useLoaderData, useFetcher} from 'react-router';
+import {
+  redirect,
+  useLoaderData,
+  useFetcher,
+  useSearchParams,
+} from 'react-router';
 import type {Route} from './+types/products.$handle';
 import {
   getSelectedProductOptions,
@@ -13,15 +18,11 @@ import {ProductImage} from '~/components/ProductImage';
 import {ProductForm} from '~/components/ProductForm';
 import {ProductAccordion} from '~/components/ProductAccordion';
 import {StickyMobileBuyBar} from '~/components/StickyMobileBuyBar';
-import {FeatureSplit} from '~/components/FeatureSplit';
-import {FeatureGrid} from '~/components/FeatureGrid';
-import {ComparisonTable} from '~/components/ComparisonTable';
-import {ThreeSteps} from '~/components/ThreeSteps';
-import {GuaranteeSection} from '~/components/GuaranteeSection';
-import {FinalCTA} from '~/components/FinalCTA';
+import {ProductTemplateSections} from '~/components/ProductTemplateSections';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {t} from '~/lib/t';
 import {config} from '~/lib/config';
+import {getReviews, getReviewSummary} from '~/lib/reviews.server';
 
 export const meta: Route.MetaFunction = ({data}) => {
   const product = data?.product;
@@ -79,13 +80,15 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
     throw new Error('Expected product handle to be defined');
   }
 
-  const [{product}] = await Promise.all([
+  const [{product}, reviews, reviewSummary] = await Promise.all([
     storefront.query(PRODUCT_QUERY, {
       variables: {
         handle,
         selectedOptions: getSelectedProductOptions(request),
       },
     }),
+    getReviews(context.env, {perPage: 8}),
+    getReviewSummary(context.env),
   ]);
 
   if (!product?.id) {
@@ -94,7 +97,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
 
   redirectIfHandleIsLocalized(request, {handle, data: product});
 
-  return {product};
+  return {product, reviews, reviewSummary};
 }
 
 function loadDeferredData({context, params}: Route.LoaderArgs) {
@@ -102,8 +105,9 @@ function loadDeferredData({context, params}: Route.LoaderArgs) {
 }
 
 export default function Product() {
-  const {product} = useLoaderData<typeof loader>();
+  const {product, reviews, reviewSummary} = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const selectedVariant = useOptimisticVariant(
     product.selectedOrFirstAvailableVariant,
@@ -120,9 +124,34 @@ export default function Product() {
   const {title, descriptionHtml} = product;
   const images = product.images?.nodes ?? [];
   const isAvailable = selectedVariant?.availableForSale ?? false;
+  const variantImages =
+    selectedVariant?.gallery?.references?.nodes.flatMap((reference) =>
+      reference?.image ? [reference.image] : [],
+    ) ?? [];
+  const galleryImages = variantImages.length ? variantImages : images;
+  const requestedSellingPlanId = searchParams.get('selling_plan');
+  const selectedSellingPlan =
+    selectedVariant?.sellingPlanAllocations.nodes.find(
+      ({sellingPlan}) => sellingPlan.id === requestedSellingPlanId,
+    ) ?? null;
+  const selectSellingPlan = (sellingPlanId: string | null) => {
+    const next = new URLSearchParams(searchParams);
+    if (sellingPlanId) next.set('selling_plan', sellingPlanId);
+    else next.delete('selling_plan');
+    setSearchParams(next, {replace: true, preventScrollReset: true});
+  };
 
   const accordionItems = [
     {title: t.product.accordions.description, content: descriptionHtml || ''},
+    {
+      title: t.product.accordions.specifications,
+      ...(selectedVariant?.specifications?.value
+        ? {richText: selectedVariant.specifications.value}
+        : {
+            content:
+              '<ul><li>Gehäuse aus lebensmittelechtem Edelstahl AISI 304</li><li>Betrieb ohne Strom und Festwasseranschluss</li><li>Größe, Filtertyp und Stand passend zur gewählten Variante</li></ul>',
+          }),
+    },
     {
       title: t.product.accordions.contents,
       content:
@@ -136,9 +165,9 @@ export default function Product() {
     {
       title: t.product.accordions.faq,
       content:
-        '<p>Bei Fragen kontaktieren Sie uns bitte unter support@example.de</p>',
+        '<p><strong>Benötigt das System Strom?</strong><br>Nein. Das Wasser wird ausschließlich durch Schwerkraft gefiltert.</p><p><strong>Welche Variante passt zu mir?</strong><br>Wählen Sie Größe, Filtertyp und Stand direkt oben aus. Preis und Verfügbarkeit werden automatisch aktualisiert.</p><p><strong>Kann ich den Filter testen?</strong><br>Ja, es gilt unsere 100-Tage-Geld-zurück-Garantie.</p>',
     },
-  ].filter((item) => item.content);
+  ].filter((item) => item.content || ('richText' in item && item.richText));
 
   // JSON-LD Product structured data
   const jsonLd = {
@@ -162,6 +191,15 @@ export default function Product() {
         : 'https://schema.org/OutOfStock',
       itemCondition: 'https://schema.org/NewCondition',
     },
+    ...(reviewSummary
+      ? {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: reviewSummary.averageRating,
+            reviewCount: reviewSummary.totalCount,
+          },
+        }
+      : {}),
   };
 
   return (
@@ -174,32 +212,45 @@ export default function Product() {
       <section className="product-page">
         {/* Gallery */}
         <ProductImage
+          key={selectedVariant?.id}
           image={selectedVariant?.image}
-          images={images.length > 0 ? images : undefined}
+          images={galleryImages.length > 0 ? galleryImages : undefined}
         />
 
         {/* Buy box */}
         <div className="product-buybox">
-          <p className="product-sale-label">FRÜHLINGSANGEBOT</p>
           <h1 className="product-title">{title}</h1>
 
           {/* Rating link */}
-          <a href="#reviews" className="product-rating-link">
-            <StarRating />
-            <span>{t.product.rating(935)}</span>
-          </a>
+          {reviewSummary && (
+            <a href="#reviews" className="product-rating-link">
+              <span className="product-rating-stars" aria-hidden="true">
+                ★★★★★
+              </span>
+              <span>
+                {reviewSummary.averageRating.toLocaleString('de-DE')}/5 ·{' '}
+                {t.product.rating(reviewSummary.totalCount)}
+              </span>
+            </a>
+          )}
 
-          {descriptionHtml && (
+          <p className="product-market-badge">{t.product.marketBadge}</p>
+
+          {descriptionHtml ? (
             <div
               className="product-intro"
               dangerouslySetInnerHTML={{__html: descriptionHtml}}
             />
+          ) : (
+            <p className="product-intro">{t.product.intro}</p>
           )}
 
           {/* Form */}
           <ProductForm
             productOptions={productOptions}
             selectedVariant={selectedVariant}
+            selectedSellingPlanId={selectedSellingPlan?.sellingPlan.id ?? null}
+            onSellingPlanChange={selectSellingPlan}
           />
 
           {/* Accordions */}
@@ -224,109 +275,14 @@ export default function Product() {
         />
       </section>
 
-      <section
-        className="product-removes"
-        aria-labelledby="product-removes-title"
-      >
-        <div className="product-removes-inner">
-          <h2 id="product-removes-title">Unsere Filter entfernen …</h2>
-          <div className="product-removes-grid">
-            {[
-              'Schwermetalle',
-              'PFAS',
-              'Mikroplastik',
-              'Chlor',
-              'Bakterien',
-              'Pestizide',
-            ].map((item) => (
-              <div key={item} className="product-removes-item">
-                <span aria-hidden="true">✓</span>
-                <strong>{item}</strong>
-                <small>bis zu 99,9 %</small>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <FeatureSplit
-        imageSide="right"
-        heading="Revolutionäre Nanobakterien-Filtration"
-        body="Aktivkohle aus natürlichen Kokosnussschalen bindet Chemikalien, Giftstoffe und Schwermetalle. Spezielle Adsorbentien hemmen zugleich das Wachstum von Verunreinigungen im Filter – Mineralien und Sauerstoff bleiben im Wasser erhalten."
-        imageSrc={images[1]?.url || images[0]?.url}
-        imageAlt="Phoenix Schwerkraft-Wasserfilter"
+      <ProductTemplateSections
+        template={product.pageTemplate?.value}
+        sections={product.pdpSections}
+        variantSteps={selectedVariant?.filtrationSteps}
+        images={images}
+        reviews={reviews}
+        reviewSummary={reviewSummary}
       />
-      <FeatureSplit
-        imageSide="left"
-        heading="Für viele Jahre gebaut"
-        body="Lebensmittelechter Edelstahl AISI 304 ersetzt Kunststoff, benötigt weder Strom noch Wasseranschluss und macht das System robust, mobil und besonders einfach zu warten."
-        imageSrc={images[2]?.url || images[0]?.url}
-        imageAlt="Phoenix Wasserfilter aus Edelstahl"
-      />
-      <FeatureGrid />
-      <ComparisonTable
-        rows={[
-          {
-            label: 'Erschwinglich',
-            phoenix: true,
-            other_systems: false,
-            bottled: false,
-            pitchers: true,
-          },
-          {
-            label: 'Tragbar',
-            phoenix: true,
-            other_systems: false,
-            bottled: true,
-            pitchers: true,
-          },
-          {
-            label: 'Langlebiger Edelstahl',
-            phoenix: true,
-            other_systems: false,
-            bottled: false,
-            pitchers: false,
-          },
-          {
-            label: '100 Tage risikofrei testen',
-            phoenix: true,
-            other_systems: false,
-            bottled: false,
-            pitchers: false,
-          },
-          {
-            label: 'Kein Wasseranschluss nötig',
-            phoenix: true,
-            other_systems: false,
-            bottled: true,
-            pitchers: true,
-          },
-        ]}
-      />
-      <ThreeSteps
-        steps={[
-          {
-            icon: '',
-            title: 'Aufstellen',
-            body: 'Das System zusammensetzen und die Filter einsetzen.',
-            order: 1,
-          },
-          {
-            icon: '',
-            title: 'Befüllen',
-            body: 'Leitungs-, Brunnen- oder Quellwasser oben einfüllen.',
-            order: 2,
-          },
-          {
-            icon: '',
-            title: 'Genießen',
-            body: 'Sauberes, wohlschmeckendes Wasser direkt zapfen.',
-            order: 3,
-          },
-        ]}
-      />
-      <GuaranteeSection imageUrl={images[3]?.url || images[0]?.url} />
-      <FinalCTA imageUrl={images[4]?.url || images[0]?.url} />
 
       {/* Sticky mobile buy bar */}
       <StickyMobileBuyBar
@@ -338,7 +294,11 @@ export default function Product() {
           void fetcher.submit(
             {
               lines: JSON.stringify([
-                {merchandiseId: selectedVariant.id, quantity: 1},
+                {
+                  merchandiseId: selectedVariant.id,
+                  quantity: 1,
+                  sellingPlanId: selectedSellingPlan?.sellingPlan.id,
+                },
               ]),
               intent: 'LinesAdd',
             },
@@ -350,19 +310,63 @@ export default function Product() {
   );
 }
 
-function StarRating() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden="true"
-    >
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-    </svg>
-  );
-}
+const PDP_METAOBJECT_FRAGMENTS = `#graphql
+  fragment PdpAssetReference on MetafieldReference {
+    ... on MediaImage {
+      id
+      image {
+        id
+        url
+        altText
+        width
+        height
+      }
+    }
+    ... on GenericFile {
+      id
+      url
+      alt
+    }
+  }
+
+  fragment PdpNestedReference on MetafieldReference {
+    ...PdpAssetReference
+    ... on Metaobject {
+      id
+      type
+      handle
+      fields {
+        key
+        type
+        value
+        reference {
+          ...PdpAssetReference
+        }
+      }
+    }
+  }
+
+  fragment PdpSectionReference on MetafieldReference {
+    ... on Metaobject {
+      id
+      type
+      handle
+      fields {
+        key
+        type
+        value
+        reference {
+          ...PdpAssetReference
+        }
+        references(first: 30) {
+          nodes {
+            ...PdpNestedReference
+          }
+        }
+      }
+    }
+  }
+` as const;
 
 const PRODUCT_VARIANT_FRAGMENT = `#graphql
   fragment ProductVariant on ProductVariant {
@@ -392,6 +396,61 @@ const PRODUCT_VARIANT_FRAGMENT = `#graphql
       name
       value
     }
+    gallery: metafield(namespace: "custom", key: "gallery") {
+      references(first: 20) {
+        nodes {
+          ... on MediaImage {
+            id
+            image {
+              id
+              url
+              altText
+              width
+              height
+            }
+          }
+        }
+      }
+    }
+    specifications: metafield(namespace: "custom", key: "specifications") {
+      type
+      value
+    }
+    filtrationSteps: metafield(namespace: "custom", key: "filtration_steps") {
+      references(first: 20) {
+        nodes {
+          ...PdpNestedReference
+        }
+      }
+    }
+    sellingPlanAllocations(first: 20) {
+      nodes {
+        sellingPlan {
+          id
+          name
+          description
+          recurringDeliveries
+          options {
+            name
+            value
+          }
+        }
+        priceAdjustments {
+          price {
+            amount
+            currencyCode
+          }
+          compareAtPrice {
+            amount
+            currencyCode
+          }
+          perDeliveryPrice {
+            amount
+            currencyCode
+          }
+        }
+      }
+    }
     sku
     title
     unitPrice {
@@ -411,6 +470,16 @@ const PRODUCT_FRAGMENT = `#graphql
     description
     encodedVariantExistence
     encodedVariantAvailability
+    pageTemplate: metafield(namespace: "custom", key: "page_template") {
+      value
+    }
+    pdpSections: metafield(namespace: "custom", key: "pdp_sections") {
+      references(first: 30) {
+        nodes {
+          ...PdpSectionReference
+        }
+      }
+    }
     options {
       name
       optionValues {
@@ -463,4 +532,5 @@ const PRODUCT_QUERY = `#graphql
     }
   }
   ${PRODUCT_FRAGMENT}
+  ${PDP_METAOBJECT_FRAGMENTS}
 ` as const;

@@ -6,14 +6,20 @@ interface ComparisonRow {
   pitchers: boolean;
 }
 
-export function ComparisonTable({rows}: {rows: ComparisonRow[]}) {
+export function ComparisonTable({
+  rows,
+  heading = 'Warum Phoenix?',
+}: {
+  rows: ComparisonRow[];
+  heading?: string;
+}) {
   if (!rows.length) return null;
 
   return (
     <section className="bg-white px-5 py-16 md:py-24">
       <div className="mx-auto max-w-5xl">
         <h2 className="mb-10 text-center font-display text-3xl font-bold text-brand-dark md:text-4xl">
-          Warum Phoenix?
+          {heading}
         </h2>
 
         <div className="overflow-x-auto">

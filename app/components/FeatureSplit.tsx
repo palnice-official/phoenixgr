@@ -1,4 +1,5 @@
 import {Link} from 'react-router';
+import type {ReactNode, VideoHTMLAttributes} from 'react';
 
 interface FeatureImage {
   src: string;
@@ -8,7 +9,7 @@ interface FeatureImage {
 interface FeatureSplitProps {
   imageSide: 'left' | 'right';
   heading: string;
-  body: string;
+  body: ReactNode;
   cta?: {
     text: string;
     href: string;
@@ -16,6 +17,10 @@ interface FeatureSplitProps {
   imageSrc?: string;
   imageAlt?: string;
   images?: FeatureImage[];
+  video?: VideoHTMLAttributes<HTMLVideoElement> & {
+    src: string;
+    captionsSrc: string;
+  };
 }
 
 export function FeatureSplit({
@@ -26,6 +31,7 @@ export function FeatureSplit({
   imageSrc,
   imageAlt,
   images,
+  video,
 }: FeatureSplitProps) {
   const isLeft = imageSide === 'left';
   const hasGrid = images && images.length > 1;
@@ -40,7 +46,11 @@ export function FeatureSplit({
         >
           {/* Image */}
           <div className="w-full md:w-1/2">
-            {hasGrid ? (
+            {video ? (
+              <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
+                <FeatureVideo label={imageAlt || heading} video={video} />
+              </div>
+            ) : hasGrid ? (
               <div className="grid grid-cols-2 gap-3">
                 {images!.map((img) => (
                   <div
@@ -71,9 +81,9 @@ export function FeatureSplit({
             <h2 className="mb-6 font-display text-3xl font-bold text-brand-dark md:text-4xl">
               {heading}
             </h2>
-            <p className="mb-8 text-lg leading-relaxed text-neutral-600">
+            <div className="mb-8 text-lg leading-relaxed text-neutral-600">
               {body}
-            </p>
+            </div>
             {cta && (
               <Link
                 to={cta.href}
@@ -86,5 +96,24 @@ export function FeatureSplit({
         </div>
       </div>
     </section>
+  );
+}
+
+function FeatureVideo({
+  label,
+  video,
+}: {
+  label: string;
+  video: NonNullable<FeatureSplitProps['video']>;
+}) {
+  const {captionsSrc, ...videoProps} = video;
+  return (
+    <video
+      {...videoProps}
+      aria-label={label}
+      className="h-full w-full object-cover"
+    >
+      <track default kind="captions" src={captionsSrc} srcLang="de" />
+    </video>
   );
 }

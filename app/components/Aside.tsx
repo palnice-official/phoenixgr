@@ -28,15 +28,17 @@ type AsideContextValue = {
 export function Aside({
   children,
   heading,
+  id,
   type,
 }: {
   children?: React.ReactNode;
+  id?: string;
   type: AsideType;
   heading: React.ReactNode;
 }) {
   const {type: activeType, close} = useAside();
   const expanded = type === activeType;
-  const id = useId();
+  const headingId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const abortController = new AbortController();
@@ -82,16 +84,25 @@ export function Aside({
     <div
       aria-modal
       aria-hidden={!expanded}
-      className={`overlay ${expanded ? 'expanded' : ''}`}
+      className={`overlay overlay-${type} ${expanded ? 'expanded' : ''}`}
+      id={id}
       ref={dialogRef}
       role="dialog"
-      aria-labelledby={id}
+      aria-labelledby={headingId}
     >
-      <button className="close-outside" onClick={close} aria-label="Schließen" />
-      <aside>
+      <button
+        className="close-outside"
+        onClick={close}
+        aria-label="Schließen"
+      />
+      <aside className={`aside-${type}`}>
         <header>
-          <h3 id={id}>{heading}</h3>
-          <button className="close reset" onClick={close} aria-label="Schließen">
+          <h3 id={headingId}>{heading}</h3>
+          <button
+            className="close reset"
+            onClick={close}
+            aria-label="Schließen"
+          >
             &times;
           </button>
         </header>

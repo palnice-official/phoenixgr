@@ -1,4 +1,4 @@
-import {Suspense} from 'react';
+import {Suspense, useState} from 'react';
 import {Await, NavLink, useAsyncValue} from 'react-router';
 import {
   type CartViewPayload,
@@ -16,6 +16,12 @@ interface HeaderProps {
 }
 
 type Viewport = 'desktop' | 'mobile';
+type MenuItemData = {
+  id: string;
+  title: string;
+  url?: string | null;
+  items?: readonly MenuItemData[];
+};
 
 export function Header({
   header,
@@ -24,11 +30,31 @@ export function Header({
   publicStoreDomain,
 }: HeaderProps) {
   const {shop, menu} = header;
+  const logo = shop.brand?.logo?.image;
+
   return (
     <header className="header">
-      <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
-        <strong>{shop.name}</strong>
+      <HeaderMenuMobileToggle />
+
+      <NavLink
+        aria-label={shop.name}
+        className="header-logo"
+        end
+        prefetch="intent"
+        to="/"
+      >
+        {logo?.url ? (
+          <img
+            src={logo.url}
+            alt={logo.altText || shop.name}
+            width={logo.width || undefined}
+            height={logo.height || undefined}
+          />
+        ) : (
+          <strong>{shop.name}</strong>
+        )}
       </NavLink>
+
       <HeaderMenu
         menu={menu}
         viewport="desktop"
@@ -51,46 +77,167 @@ export function HeaderMenu({
   viewport: Viewport;
   publicStoreDomain: HeaderProps['publicStoreDomain'];
 }) {
-  const className = `header-menu-${viewport}`;
   const {close} = useAside();
+  const items: readonly MenuItemData[] = menu?.items?.length
+    ? menu.items
+    : FALLBACK_HEADER_MENU.items;
 
   return (
-    <nav className={className} role="navigation">
-      {viewport === 'mobile' && (
-        <NavLink
-          end
-          onClick={close}
-          prefetch="intent"
-          style={activeLinkStyle}
-          to="/"
-        >
-          Home
-        </NavLink>
-      )}
-      {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
-        if (!item.url) return null;
-
-        // if the url is internal, we strip the domain
-        const url =
-          item.url.includes(publicStoreDomain) ||
-          item.url.includes(primaryDomainUrl)
-            ? new URL(item.url).pathname
-            : item.url;
-        return (
-          <NavLink
-            className="header-menu-item"
-            end
+    <nav
+      aria-label={viewport === 'desktop' ? 'Hauptnavigation' : 'Mobiles Menü'}
+      className={`header-menu-${viewport}`}
+    >
+      {items.map((item) =>
+        viewport === 'mobile' ? (
+          <MobileMenuItem
+            item={item}
             key={item.id}
-            onClick={close}
-            prefetch="intent"
-            style={activeLinkStyle}
-            to={url}
-          >
-            {item.title}
-          </NavLink>
-        );
-      })}
+            close={close}
+            primaryDomainUrl={primaryDomainUrl}
+            publicStoreDomain={publicStoreDomain}
+          />
+        ) : (
+          <DesktopMenuItem
+            item={item}
+            key={item.id}
+            primaryDomainUrl={primaryDomainUrl}
+            publicStoreDomain={publicStoreDomain}
+          />
+        ),
+      )}
     </nav>
+  );
+}
+
+function DesktopMenuItem({
+  item,
+  primaryDomainUrl,
+  publicStoreDomain,
+}: {
+  item: MenuItemData;
+  primaryDomainUrl: string;
+  publicStoreDomain: string;
+}) {
+  const children = item.items || [];
+  if (!item.url) return null;
+
+  return (
+    <div className="header-menu-group">
+      <MenuLink
+        className="header-menu-item"
+        item={item}
+        primaryDomainUrl={primaryDomainUrl}
+        publicStoreDomain={publicStoreDomain}
+      />
+      {!!children.length && (
+        <>
+          <ChevronDown />
+          <div className="header-submenu">
+            {children.map((child) =>
+              child.url ? (
+                <MenuLink
+                  className="header-submenu-item"
+                  item={child}
+                  key={child.id}
+                  primaryDomainUrl={primaryDomainUrl}
+                  publicStoreDomain={publicStoreDomain}
+                />
+              ) : null,
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function MobileMenuItem({
+  item,
+  close,
+  primaryDomainUrl,
+  publicStoreDomain,
+}: {
+  item: MenuItemData;
+  close: () => void;
+  primaryDomainUrl: string;
+  publicStoreDomain: string;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const children = item.items || [];
+  const childrenId = `mobile-menu-${item.id.replace(/[^a-zA-Z0-9_-]/g, '')}`;
+  if (!item.url) return null;
+
+  return (
+    <div className="header-mobile-menu-item">
+      <div className="header-mobile-item-row">
+        <MenuLink
+          className="header-mobile-link"
+          item={item}
+          onClick={close}
+          primaryDomainUrl={primaryDomainUrl}
+          publicStoreDomain={publicStoreDomain}
+        />
+        {!!children.length && (
+          <button
+            type="button"
+            aria-controls={childrenId}
+            aria-expanded={expanded}
+            aria-label={`${item.title} Untermenü ${expanded ? 'schließen' : 'öffnen'}`}
+            onClick={() => setExpanded((open) => !open)}
+          >
+            <ChevronDown />
+          </button>
+        )}
+      </div>
+      {!!children.length && (
+        <div
+          className="header-mobile-submenu"
+          hidden={!expanded}
+          id={childrenId}
+        >
+          {children.map((child) =>
+            child.url ? (
+              <MenuLink
+                className="header-mobile-sublink"
+                item={child}
+                key={child.id}
+                onClick={close}
+                primaryDomainUrl={primaryDomainUrl}
+                publicStoreDomain={publicStoreDomain}
+              />
+            ) : null,
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MenuLink({
+  className,
+  item,
+  onClick,
+  primaryDomainUrl,
+  publicStoreDomain,
+}: {
+  className: string;
+  item: MenuItemData;
+  onClick?: () => void;
+  primaryDomainUrl: string;
+  publicStoreDomain: string;
+}) {
+  return (
+    <NavLink
+      className={({isActive, isPending}) =>
+        `${className}${isActive ? ' active' : ''}${isPending ? ' pending' : ''}`
+      }
+      end
+      onClick={onClick}
+      prefetch="intent"
+      to={menuUrl(item.url || '/', primaryDomainUrl, publicStoreDomain)}
+    >
+      {item.title}
+    </NavLink>
   );
 }
 
@@ -99,14 +246,16 @@ function HeaderCtas({
   cart,
 }: Pick<HeaderProps, 'isLoggedIn' | 'cart'>) {
   return (
-    <nav className="header-ctas" role="navigation">
-      <HeaderMenuMobileToggle />
-      <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
-        <Suspense fallback="Sign in">
-          <Await resolve={isLoggedIn} errorElement="Sign in">
-            {(isLoggedIn) => (isLoggedIn ? 'Account' : 'Sign in')}
-          </Await>
-        </Suspense>
+    <nav aria-label="Konto, Suche und Warenkorb" className="header-ctas">
+      <NavLink className="header-icon-button" prefetch="intent" to="/account">
+        <AccountIcon />
+        <span className="sr-only">
+          <Suspense fallback="Anmelden">
+            <Await resolve={isLoggedIn} errorElement="Anmelden">
+              {(loggedIn) => (loggedIn ? 'Konto' : 'Anmelden')}
+            </Await>
+          </Suspense>
+        </span>
       </NavLink>
       <SearchToggle />
       <CartToggle cart={cart} />
@@ -115,13 +264,19 @@ function HeaderCtas({
 }
 
 function HeaderMenuMobileToggle() {
-  const {open} = useAside();
+  const {open, type} = useAside();
   return (
     <button
-      className="header-menu-mobile-toggle reset"
+      type="button"
+      aria-controls="mobile-navigation"
+      aria-expanded={type === 'mobile'}
+      aria-label="Menü öffnen"
+      className="header-menu-mobile-toggle"
       onClick={() => open('mobile')}
     >
-      <h3>☰</h3>
+      <span />
+      <span />
+      <span />
     </button>
   );
 }
@@ -129,8 +284,13 @@ function HeaderMenuMobileToggle() {
 function SearchToggle() {
   const {open} = useAside();
   return (
-    <button className="reset" onClick={() => open('search')}>
-      Search
+    <button
+      type="button"
+      aria-label="Suche öffnen"
+      className="header-icon-button"
+      onClick={() => open('search')}
+    >
+      <SearchIcon />
     </button>
   );
 }
@@ -141,9 +301,11 @@ function CartBadge({count}: {count: number}) {
 
   return (
     <a
+      aria-label={`Warenkorb, ${count} Artikel`}
+      className="header-icon-button header-cart"
       href="/cart"
-      onClick={(e) => {
-        e.preventDefault();
+      onClick={(event) => {
+        event.preventDefault();
         open('cart');
         publish('cart_viewed', {
           cart,
@@ -153,7 +315,8 @@ function CartBadge({count}: {count: number}) {
         } as CartViewPayload);
       }}
     >
-      Cart <span aria-label={`(items: ${count})`}>{count}</span>
+      <CartIcon />
+      {count > 0 && <span className="header-cart-count">{count}</span>}
     </a>
   );
 }
@@ -174,57 +337,65 @@ function CartBanner() {
   return <CartBadge count={cart?.totalQuantity ?? 0} />;
 }
 
+function menuUrl(
+  url: string,
+  primaryDomainUrl: string,
+  publicStoreDomain: string,
+) {
+  if (url.startsWith('/')) return url;
+  if (url.includes(publicStoreDomain) || url.includes(primaryDomainUrl)) {
+    const parsed = new URL(url);
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  }
+  return url;
+}
+
+function AccountIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4.5 21a7.5 7.5 0 0 1 15 0" />
+    </svg>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <circle cx="10.75" cy="10.75" r="6.75" />
+      <path d="m16 16 4.5 4.5" />
+    </svg>
+  );
+}
+
+function CartIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <path d="M2.5 4h2l2 11.5h11.75l2-8.5H5" />
+      <circle cx="8.5" cy="20" r="1" />
+      <circle cx="17" cy="20" r="1" />
+    </svg>
+  );
+}
+
+function ChevronDown() {
+  return (
+    <svg aria-hidden="true" className="header-chevron" viewBox="0 0 12 8">
+      <path d="m1 1.5 5 5 5-5" />
+    </svg>
+  );
+}
+
 const FALLBACK_HEADER_MENU = {
-  id: 'fallback-header',
   items: [
     {
       id: 'all-products',
-      resourceId: null,
-      tags: [],
       title: 'Alle Produkte',
-      type: 'HTTP',
       url: '/collections',
       items: [],
     },
-    {
-      id: 'reviews',
-      resourceId: null,
-      tags: [],
-      title: 'Bewertungen',
-      type: 'HTTP',
-      url: '/pages/bewertungen',
-      items: [],
-    },
-    {
-      id: 'faq',
-      resourceId: null,
-      tags: [],
-      title: 'FAQ',
-      type: 'HTTP',
-      url: '/pages/faq',
-      items: [],
-    },
-    {
-      id: 'about',
-      resourceId: null,
-      tags: [],
-      title: 'Über uns',
-      type: 'PAGE',
-      url: '/pages/ueber-uns',
-      items: [],
-    },
+    {id: 'reviews', title: 'Bewertungen', url: '/pages/bewertungen', items: []},
+    {id: 'faq', title: 'FAQ', url: '/pages/faq', items: []},
+    {id: 'about', title: 'Über uns', url: '/pages/ueber-uns', items: []},
   ],
 };
-
-function activeLinkStyle({
-  isActive,
-  isPending,
-}: {
-  isActive: boolean;
-  isPending: boolean;
-}) {
-  return {
-    fontWeight: isActive ? 'bold' : undefined,
-    color: isPending ? 'grey' : 'black',
-  };
-}
