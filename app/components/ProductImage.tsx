@@ -21,6 +21,13 @@ export function ProductImage({image, images}: ProductImageProps) {
 
   const currentImage = allImages[selectedIndex] ?? image;
 
+  const visibleThumbnails = Array.from(
+    {length: Math.min(4, allImages.length)},
+    (_, offset) => {
+      const index = (selectedIndex + offset) % allImages.length;
+      return {image: allImages[index], index};
+    },
+  );
   if (!currentImage) {
     return <div className="product-image-empty" />;
   }
@@ -30,7 +37,7 @@ export function ProductImage({image, images}: ProductImageProps) {
       {/* Thumbnails */}
       {allImages.length > 1 && (
         <div className="product-gallery-thumbs">
-          {allImages.map((img, index) => (
+          {visibleThumbnails.map(({image: img, index}) => (
             <button
               key={img.id}
               className={`product-gallery-thumb ${
