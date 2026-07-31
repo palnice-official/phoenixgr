@@ -1,4 +1,4 @@
-import {Link, useNavigate} from 'react-router';
+import {Link} from 'react-router';
 import {type MappedProductOptions} from '@shopify/hydrogen';
 import type {
   Maybe,
@@ -11,6 +11,13 @@ import {t} from '~/lib/t';
 import {useState} from 'react';
 import {ProductPrice} from './ProductPrice';
 
+
+const OPTION_IMAGES = [
+  ['family-1.svg', 'family-3.svg', 'family-5.svg'],
+  ['carbon2.png', 'stainless2.png'],
+  ['no_stand.png', 'stand_ss.png', 'stand_wooden.png'],
+].map((images) => images.map((image) => '/images/product-options/' + image));
+
 export function ProductForm({
   productOptions,
   selectedVariant,
@@ -22,35 +29,49 @@ export function ProductForm({
   selectedSellingPlanId?: string | null;
   onSellingPlanChange?: (sellingPlanId: string | null) => void;
 }) {
-  const navigate = useNavigate();
   const {open} = useAside();
   const [quantity, setQuantity] = useState(1);
 
   const isAvailable = selectedVariant?.availableForSale ?? false;
   const sellingPlans = selectedVariant?.sellingPlanAllocations.nodes ?? [];
+  const selectedAllocation =
+    sellingPlans.find(
+      ({sellingPlan}) => sellingPlan.id === selectedSellingPlanId,
+    ) ?? null;
 
   return (
     <div className="product-form">
       {productOptions.map((option, optionIndex) => {
         if (option.optionValues.length === 1) return null;
 
+        const optionImages = OPTION_IMAGES[optionIndex];
+        const layout = optionIndex === 0 ? 'cards' : 'visual';
+
         return (
-          <div className="product-options" key={option.name}>
+          <div
+            className={[
+              'product-options',
+              optionImages ? 'product-options--' + layout : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            key={option.name}
+          >
             <label className="product-options-label">
               <span className="product-option-step">{optionIndex + 1}</span>
               {option.name}
               <span className="product-options-selected">
+                {' - '}
                 {option.optionValues.find((v) => v.selected)?.name}
               </span>
             </label>
             <div className="product-options-grid">
-              {option.optionValues.map((value) => {
+              {option.optionValues.map((value, valueIndex) => {
                 const {
                   name,
                   handle,
                   variantUriQuery,
                   selected,
-                  available,
                   exists,
                   isDifferentProduct,
                   swatch,
@@ -66,30 +87,49 @@ export function ProductForm({
                       replace
                       to={`/products/${handle}?${variantUriQuery}`}
                     >
-                      <ProductOptionSwatch swatch={swatch} name={name} />
+                      <ProductOptionSwatch
+                        swatch={swatch}
+                        name={name}
+                        localImage={optionImages?.[valueIndex]}
+                      />
                     </Link>
                   );
                 }
 
+                if (!exists) {
+                  return (
+                    <button
+                      type="button"
+                      className="product-options-item"
+                      key={option.name + name}
+                      disabled
+                    >
+                      <ProductOptionSwatch
+                        swatch={swatch}
+                        name={name}
+                        localImage={optionImages?.[valueIndex]}
+                      />
+                    </button>
+                  );
+                }
+
                 return (
-                  <button
-                    type="button"
+                  <Link
                     className={`product-options-item ${selected ? 'selected' : ''} ${
                       exists && !selected ? 'link' : ''
                     }`}
                     key={option.name + name}
-                    disabled={!exists}
-                    onClick={() => {
-                      if (!selected) {
-                        void navigate(`?${variantUriQuery}`, {
-                          replace: true,
-                          preventScrollReset: true,
-                        });
-                      }
-                    }}
+                    prefetch="intent"
+                    preventScrollReset
+                    replace
+                    to={`?${variantUriQuery}`}
                   >
-                    <ProductOptionSwatch swatch={swatch} name={name} />
-                  </button>
+                    <ProductOptionSwatch
+                      swatch={swatch}
+                      name={name}
+                      localImage={optionImages?.[valueIndex]}
+                    />
+                  </Link>
                 );
               })}
             </div>
@@ -97,9 +137,26 @@ export function ProductForm({
         );
       })}
 
+      <div className="product-price-status">
+        <ProductPrice
+          price={
+            selectedAllocation?.priceAdjustments[0]?.price ??
+            selectedVariant?.price
+          }
+          compareAtPrice={
+            selectedAllocation?.priceAdjustments[0]?.compareAtPrice ??
+            selectedVariant?.compareAtPrice
+          }
+          size="large"
+        />
+        <p className={`product-stock-status ${isAvailable ? 'in-stock' : ''}`}>
+          {isAvailable ? 'Auf Lager' : t.product.soldOut}
+        </p>
+      </div>
+
       {!!sellingPlans.length && onSellingPlanChange && (
         <fieldset className="product-purchase-options">
-          <legend>Kaufoption</legend>
+          <legend>{t.product.purchaseOptions.heading}</legend>
           <label
             aria-label="Einmaliger Kauf"
             htmlFor="purchase-option-once"
@@ -138,50 +195,13 @@ export function ProductForm({
                 {sellingPlan.description && (
                   <small>{sellingPlan.description}</small>
                 )}
+                <small>{t.product.purchaseOptions.note}</small>
               </span>
             </label>
           ))}
         </fieldset>
       )}
 
-      <ProductPrice
-        price={selectedVariant?.price}
-        compareAtPrice={selectedVariant?.compareAtPrice}
-        size="large"
-      />
-
-      {/* Quantity */}
-      <div className="product-quantity">
-        <label htmlFor="quantity" className="product-quantity-label">
-          {t.product.quantity}:
-        </label>
-        <div className="product-quantity-stepper">
-          <button
-            type="button"
-            aria-label={t.product.quantity}
-            disabled={quantity <= 1}
-            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-          >
-            &#8722;
-          </button>
-          <input
-            id="quantity"
-            type="number"
-            min={1}
-            value={quantity}
-            onChange={(e) =>
-              setQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))
-            }
-          />
-          <button
-            type="button"
-            aria-label={t.product.quantity}
-            onClick={() => setQuantity((q) => q + 1)}
-          >
-            &#43;
-          </button>
-        </div>
-      </div>
 
       {/* Add to cart */}
       <AddToCartButton
@@ -203,56 +223,74 @@ export function ProductForm({
         {isAvailable ? t.product.addToCart : t.product.soldOut}
       </AddToCartButton>
 
+      <p className="product-shipping-note">{t.product.shippingEstimate}</p>
+      <ul className="product-payment-list" aria-label="Zahlungsarten">
+        <li>Visa</li>
+        <li>Mastercard</li>
+        <li>PayPal</li>
+        <li>Klarna</li>
+      </ul>
+
       {/* Trust checkmarks */}
       <ul className="product-trust-list">
         <li>
-          <CheckIcon />
+          <img
+            className="product-trust-icon"
+            src="/images/product-options/icon-truck.png"
+            alt=""
+          />
           {t.product.trust.freeShipping}
         </li>
         <li>
-          <CheckIcon />
+          <img
+            className="product-trust-icon"
+            src="/images/product-options/icon-tag.png"
+            alt=""
+          />
           {t.product.trust.moneyBack}
         </li>
         <li>
-          <CheckIcon />
+          <img
+            className="product-trust-icon"
+            src="/images/product-options/icon-award.png"
+            alt=""
+          />
           {t.product.trust.certified}
         </li>
         <li>
-          <CheckIcon />
+          <img
+            className="product-trust-icon"
+            src="/images/product-options/icon-headset.png"
+            alt=""
+          />
           {t.product.trust.support}
+        </li>
+        <li>
+          <img
+            className="product-trust-icon"
+            src="/images/product-options/icon-award.png"
+            alt=""
+          />
+          10 Jahre Garantie
         </li>
       </ul>
     </div>
   );
 }
 
-function CheckIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}
 
 function ProductOptionSwatch({
   swatch,
   name,
+  localImage,
 }: {
   swatch?: Maybe<ProductOptionValueSwatch> | undefined;
   name: string;
+  localImage?: string;
 }) {
-  const image = swatch?.image?.previewImage?.url;
+  const image = localImage || swatch?.image?.previewImage?.url;
   const color = swatch?.color;
+  const sizeMatch = name.match(/^(\d+\s*Liter)\s+(.+)$/i);
 
   if (!image && !color) return <span>{name}</span>;
 
@@ -265,6 +303,16 @@ function ProductOptionSwatch({
       }}
     >
       {!!image && <img src={image} alt={name} />}
+      <span>
+        {sizeMatch ? (
+          <>
+            <small>{sizeMatch[2]}</small>
+            <strong>{sizeMatch[1]}</strong>
+          </>
+        ) : (
+          name
+        )}
+      </span>
     </div>
   );
 }

@@ -33,14 +33,14 @@ Field keys must match exactly. Fields not marked required may be left empty.
 
 ## 3. Item metaobjects
 
-| Definition         | Fields                                                                      |
-| ------------------ | --------------------------------------------------------------------------- |
-| `contaminant_item` | `label` single-line (required)                                              |
-| `step_item`        | Existing fields: `icon` file, `title`, `body`, `order` integer              |
-| `comparison_row`   | Existing fields: `label`, `phoenix`, `other_systems`, `bottled`, `pitchers` |
-| `benefit_item`     | `icon` file or `emoji` single-line, `text` multi-line (required)            |
-| `lab_report`       | Existing fields: `image` file, `label`, `pdf` file                          |
-| `faq_item`         | `question` single-line (required), `answer` rich text (required)            |
+| Definition         | Fields                                                                                                                            |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| `contaminant_item` | `label` single-line (required)                                                                                                    |
+| `step_item`        | Existing fields: `icon` file, `title`, `body`, `order` integer                                                                    |
+| `comparison_row`   | Existing fields: `label`, `phoenix`, `other_systems`, `bottled`, `pitchers`                                                       |
+| `benefit_item`     | `icon` file or `emoji` single-line, `text` multi-line (required)                                                                  |
+| `lab_report`       | Existing fields: `image` file, `label`, `pdf` file                                                                                |
+| `faq_item`         | `question` single-line (required), `answer` rich text (required), `category` single-line (optional; matching values become a tab) |
 
 ## 4. Populate a product
 

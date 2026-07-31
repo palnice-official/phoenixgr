@@ -6,6 +6,14 @@ interface ProductRemovesProps {
   resultText?: string;
 }
 
+const icons = [
+  '/images/ProductRemoves/icon-marquee-1_1.png',
+  '/images/ProductRemoves/icon-metals.png',
+  '/images/ProductRemoves/icon-marquee-3_1.png',
+  '/images/ProductRemoves/icon-chlorine.png',
+  '/images/ProductRemoves/icon-marquee-2_21405555-03c3-4a4a-aa04-0b2cf8724dce.png',
+];
+
 export function ProductRemoves({
   heading,
   items,
@@ -15,12 +23,14 @@ export function ProductRemoves({
 
   const list = (duplicate = false) => (
     <ul aria-hidden={duplicate || undefined} className="product-removes-list">
-      {items.map((item) => (
+      {items.map((item, index) => (
         <li
           className="product-removes-item"
           key={`${duplicate ? 'duplicate' : 'original'}-${item}`}
         >
-          <span aria-hidden="true">✓</span>
+          <span className="product-removes-icon">
+            <img alt="" loading="lazy" src={icons[index % icons.length]} />
+          </span>
           <strong>{item}</strong>
           <small>{resultText}</small>
         </li>

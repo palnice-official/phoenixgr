@@ -41,11 +41,13 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
         discountsHeadingId={discountsHeadingId}
         discountCodeInputId={discountCodeInputId}
       />
-      <CartGiftCard
-        giftCardCodes={cart?.appliedGiftCards}
-        giftCardHeadingId={giftCardHeadingId}
-        giftCardInputId={giftCardInputId}
-      />
+      {layout === 'page' && (
+        <CartGiftCard
+          giftCardCodes={cart?.appliedGiftCards}
+          giftCardHeadingId={giftCardHeadingId}
+          giftCardInputId={giftCardInputId}
+        />
+      )}
       <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} />
     </div>
   );

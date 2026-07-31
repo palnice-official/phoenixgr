@@ -1,4 +1,4 @@
-import {Fragment} from 'react';
+import {Fragment, type ReactNode} from 'react';
 import {RichText} from '@shopify/hydrogen';
 import {ComparisonTable} from '~/components/ComparisonTable';
 import {FeatureGrid} from '~/components/FeatureGrid';
@@ -6,6 +6,7 @@ import {FeatureSplit} from '~/components/FeatureSplit';
 import {GuaranteeSection} from '~/components/GuaranteeSection';
 import {HowItWorks} from '~/components/HowItWorks';
 import {LabReports} from '~/components/LabReports';
+import {ProductFaq, type FaqCategory} from '~/components/ProductFaq';
 import {ProductGalleryStrip} from '~/components/ProductGalleryStrip';
 import {ProductRemoves} from '~/components/ProductRemoves';
 import {ReviewsCarousel} from '~/components/ReviewsCarousel';
@@ -42,6 +43,7 @@ interface DynamicProductSectionsProps {
   images: ProductImage[];
   reviews: Review[];
   reviewSummary: ReviewSummary | null;
+  comparisonCta?: ReactNode;
 }
 
 export function DynamicProductSections({
@@ -50,6 +52,7 @@ export function DynamicProductSections({
   images,
   reviews,
   reviewSummary,
+  comparisonCta,
 }: DynamicProductSectionsProps) {
   const sectionNodes = referenceNodes(sections).filter(isMetaobject);
   const overrideSteps = referenceNodes(variantSteps)
@@ -129,6 +132,7 @@ export function DynamicProductSections({
             <Fragment key={section.id}>
               <HowItWorks />
               <ComparisonTable
+                cta={comparisonCta}
                 heading={value(fields.heading) || undefined}
                 rows={rows.filter((row) => row.label)}
               />
@@ -197,37 +201,15 @@ export function DynamicProductSections({
             return {
               question: value(entry.question) || value(entry.title),
               answer: entry.answer || entry.body,
+              category: value(entry.category),
             };
           });
           return (
-            <section
+            <ProductFaq
               key={section.id}
-              className="bg-surface px-5 py-16 md:py-24"
-            >
-              <div className="mx-auto max-w-4xl">
-                <h2 className="mb-10 text-center font-display text-3xl font-bold text-brand-dark md:text-4xl">
-                  {value(fields.heading) || 'Häufig gestellte Fragen'}
-                </h2>
-                <div className="space-y-3">
-                  {items
-                    .filter((item) => item.question)
-                    .map((item) => (
-                      <details
-                        key={item.question}
-                        className="rounded-xl bg-white p-5"
-                      >
-                        <summary className="cursor-pointer font-semibold text-brand-dark">
-                          {item.question}
-                        </summary>
-                        <FieldBody
-                          field={item.answer}
-                          className="mt-4 text-neutral-600"
-                        />
-                      </details>
-                    ))}
-                </div>
-              </div>
-            </section>
+              heading={value(fields.heading) || undefined}
+              categories={faqCategories(items)}
+            />
           );
         }
 
@@ -239,7 +221,7 @@ export function DynamicProductSections({
               summary={reviewSummary}
               heading={
                 value(fields.heading) ||
-                'Erfahrungen unserer Kundinnen und Kunden'
+                'Seit über 50 Jahren vertrauen Amerikaner auf unsere Wasserfilter'
               }
             />
           );
@@ -335,4 +317,24 @@ function ctaFrom(fields: Record<string, RawField | undefined>) {
   const text = value(fields.cta_text);
   const href = value(fields.cta_link);
   return text && href ? {text, href} : undefined;
+}
+
+function faqCategories(
+  items: {question: string; answer?: RawField; category: string}[],
+): FaqCategory[] {
+  const groups = new Map<string, FaqCategory['items']>();
+
+  items
+    .filter((item) => item.question)
+    .forEach((item) => {
+      const category = item.category || 'FAQ';
+      const entries = groups.get(category) || [];
+      entries.push({
+        question: item.question,
+        answer: <FieldBody field={item.answer} />,
+      });
+      groups.set(category, entries);
+    });
+
+  return [...groups].map(([title, items]) => ({title, items}));
 }

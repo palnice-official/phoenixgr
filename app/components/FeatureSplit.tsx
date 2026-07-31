@@ -19,7 +19,7 @@ interface FeatureSplitProps {
   images?: FeatureImage[];
   video?: VideoHTMLAttributes<HTMLVideoElement> & {
     src: string;
-    captionsSrc: string;
+    captionsSrc?: string;
   };
 }
 
@@ -35,49 +35,55 @@ export function FeatureSplit({
 }: FeatureSplitProps) {
   const isLeft = imageSide === 'left';
   const hasGrid = images && images.length > 1;
+  const hasMedia = Boolean(video || hasGrid || imageSrc);
 
   return (
     <section className="bg-white px-5 py-16 md:py-24">
-      <div className="mx-auto max-w-7xl">
+      <div className={`mx-auto ${hasMedia ? 'max-w-7xl' : 'max-w-5xl'}`}>
         <div
-          className={`flex flex-col items-center gap-12 ${
-            isLeft ? 'md:flex-row' : 'md:flex-row-reverse'
-          }`}
+          className={
+            hasMedia
+              ? `flex flex-col items-center gap-12 ${
+                  isLeft ? 'md:flex-row' : 'md:flex-row-reverse'
+                }`
+              : ''
+          }
         >
-          {/* Image */}
-          <div className="w-full md:w-1/2">
-            {video ? (
-              <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
-                <FeatureVideo label={imageAlt || heading} video={video} />
-              </div>
-            ) : hasGrid ? (
-              <div className="grid grid-cols-2 gap-3">
-                {images!.map((img) => (
-                  <div
-                    key={img.src}
-                    className="aspect-square overflow-hidden rounded-2xl"
-                  >
-                    <img
-                      src={img.src}
-                      alt={img.alt}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
-                <img
-                  src={imageSrc || ''}
-                  alt={imageAlt || ''}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            )}
-          </div>
+          {hasMedia && (
+            <div className="w-full md:w-1/2">
+              {video ? (
+                <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
+                  <FeatureVideo label={imageAlt || heading} video={video} />
+                </div>
+              ) : hasGrid ? (
+                <div className="grid grid-cols-2 gap-3">
+                  {images!.map((img) => (
+                    <div
+                      key={img.src}
+                      className="aspect-square overflow-hidden rounded-2xl"
+                    >
+                      <img
+                        src={img.src}
+                        alt={img.alt}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
+                  <img
+                    src={imageSrc}
+                    alt={imageAlt || ''}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Content */}
-          <div className="w-full md:w-1/2">
+          <div className={hasMedia ? 'w-full md:w-1/2' : 'w-full'}>
             <h2 className="mb-6 font-display text-3xl font-bold text-brand-dark md:text-4xl">
               {heading}
             </h2>
@@ -113,7 +119,12 @@ function FeatureVideo({
       aria-label={label}
       className="h-full w-full object-cover"
     >
-      <track default kind="captions" src={captionsSrc} srcLang="de" />
+      <track
+        default
+        kind="captions"
+        src={captionsSrc || 'data:text/vtt,WEBVTT%0A%0A'}
+        srcLang="de"
+      />
     </video>
   );
 }

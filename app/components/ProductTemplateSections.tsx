@@ -1,15 +1,17 @@
+import type {ReactNode} from 'react';
 import {ComparisonTable} from '~/components/ComparisonTable';
 import {FeatureGrid} from '~/components/FeatureGrid';
 import {FeatureSplit} from '~/components/FeatureSplit';
-import {FinalCTA} from '~/components/FinalCTA';
 import {GuaranteeSection} from '~/components/GuaranteeSection';
 import {HowItWorks} from '~/components/HowItWorks';
+import {ProductFaq} from '~/components/ProductFaq';
 import {ProductGalleryStrip} from '~/components/ProductGalleryStrip';
 import {ProductRemoves} from '~/components/ProductRemoves';
 import {ReviewsCarousel} from '~/components/ReviewsCarousel';
 import {ThreeSteps} from '~/components/ThreeSteps';
 import {DynamicProductSections} from '~/components/DynamicProductSections';
 import type {Review, ReviewSummary} from '~/lib/reviews.server';
+import {CardsSection} from './CardsSection';
 
 interface ProductImage {
   url: string;
@@ -22,6 +24,7 @@ interface ProductTemplateProps {
   images: ProductImage[];
   reviews: Review[];
   reviewSummary: ReviewSummary | null;
+  comparisonCta?: ReactNode;
 }
 
 interface ProductTemplateSectionsProps extends ProductTemplateProps {
@@ -69,26 +72,34 @@ function WaterFilterTemplate({
   images,
   reviews,
   reviewSummary,
+  comparisonCta,
 }: ProductTemplateProps) {
   return (
     <>
+      <FeatureSplit
+        imageSide="right"
+        heading="Aktivkohlefiltration für den Alltag"
+        body={
+          <>
+            <p>
+              Die Filterelemente bestehen aus hochwertiger Aktivkohle auf
+              Kokosnussschalenbasis. Sie verbessern Geschmack und Geruch des
+              Wassers, ohne Strom oder einen festen Wasseranschluss zu benötigen.
+            </p>
+            <p className="mt-6">
+              <strong>Wie funktioniert das?</strong>
+            </p>
+            <p className="mt-6">
+              Das Wasser fließt allein durch die Schwerkraft langsam durch die
+              Filter. Dadurch bleibt ausreichend Kontaktzeit mit der Aktivkohle,
+              bevor das gefilterte Wasser in der unteren Kammer gesammelt wird.
+            </p>
+          </>
+        }
+      />
       <ProductRemoves
         heading="Unsere Filter entfernen …"
-        items={[
-          'Schwermetalle',
-          'PFAS',
-          'Mikroplastik',
-          'Chlor',
-          'Bakterien',
-          'Pestizide',
-        ]}
-      />
-      <FeatureSplit
-        imageSide="right"
-        heading="Revolutionäre Nanobakterien-Filtration"
-        body="Aktivkohle aus natürlichen Kokosnussschalen bindet Chemikalien, Giftstoffe und Schwermetalle. Spezielle Adsorbentien hemmen zugleich das Wachstum von Verunreinigungen im Filter – Mineralien und Sauerstoff bleiben im Wasser erhalten."
-        imageSrc={images[1]?.url || images[0]?.url}
-        imageAlt="Phoenix Schwerkraft-Wasserfilter"
+        items={['Mikroplastik', 'Blei', 'PFAS', 'Chlor', 'Schwermetalle']}
       />
       <FeatureSplit
         imageSide="left"
@@ -98,15 +109,8 @@ function WaterFilterTemplate({
         imageAlt="Phoenix Wasserfilter aus Edelstahl"
       />
       <FeatureSplit
-        imageSide="right"
-        heading="Für viele Jahre gebaut"
-        body="Lebensmittelechter Edelstahl AISI 304 ersetzt Kunststoff, benötigt weder Strom noch Wasseranschluss und macht das System robust, mobil und besonders einfach zu warten."
-        imageSrc={images[2]?.url || images[0]?.url}
-        imageAlt="Phoenix Wasserfilter aus Edelstahl"
-      />
-      <FeatureSplit
         imageSide="left"
-        heading="So funktioniert der Phoenix"
+        heading="Filtern ohne Strom und Wasseranschluss"
         body={
           <>
             <p>
@@ -121,8 +125,6 @@ function WaterFilterTemplate({
         }
         video={{
           src: 'https://cdn.shopify.com/videos/c/o/v/4c32c43c15924de0b503e84991493b60.mp4',
-          poster: 'https://cdn.shopify.com/images/phoenix-video-cover.jpg',
-          captionsSrc: '/videos/phoenix-de.vtt',
           autoPlay: true,
           muted: true,
           loop: true,
@@ -132,11 +134,12 @@ function WaterFilterTemplate({
         }}
         cta={{
           text: 'Jetzt bestellen',
-          href: '/products/the-phoenix-gravity-wasserfilter',
+          href: '/products/le-filtre-a-eau-par-gravite-phoenix-test',
         }}
       />
       <HowItWorks />
       <ComparisonTable
+        cta={comparisonCta}
         rows={[
           {
             label: 'Erschwinglich',
@@ -167,6 +170,20 @@ function WaterFilterTemplate({
             pitchers: false,
           },
           {
+            label: 'Pflegeleicht',
+            phoenix: true,
+            other_systems: true,
+            bottled: false,
+            pitchers: false,
+          },
+          {
+            label: 'Großes Fassungsvermögen',
+            phoenix: true,
+            other_systems: true,
+            bottled: false,
+            pitchers: false,
+          },
+          {
             label: 'Kein Wasseranschluss nötig',
             phoenix: true,
             other_systems: false,
@@ -175,36 +192,57 @@ function WaterFilterTemplate({
           },
         ]}
       />
-      <ThreeSteps
-        steps={[
+
+      <CardsSection
+        backgroundImage="/images/CardsSection/filter-background-light.webp"
+        heading="Sauberes Wasser kann so einfach sein"
+        cards={[
           {
-            icon: '',
-            title: 'Aufstellen',
-            body: 'Das System zusammensetzen und die Filter einsetzen.',
-            order: 1,
+            icon: '/images/icons/icon-water.svg',
+            title: 'Leistungsstarke Aktivkohlefilter',
+            description:
+              'Filterelemente auf Kokosnussschalenbasis verbessern Geschmack und Geruch des Wassers.',
           },
           {
-            icon: '',
-            title: 'Befüllen',
-            body: 'Leitungs-, Brunnen- oder Quellwasser oben einfüllen.',
-            order: 2,
+            icon: '/images/icons/icon-bottle.svg',
+            title: 'Weniger Einwegflaschen',
+            description:
+              'Gefiltertes Wasser direkt zu Hause reduziert Einkäufe, Lagerplatz und Verpackungsabfall.',
           },
           {
-            icon: '',
-            title: 'Genießen',
-            body: 'Sauberes, wohlschmeckendes Wasser direkt zapfen.',
-            order: 3,
+            icon: '/images/icons/icon-scales.svg',
+            title: 'Flexibel und mobil',
+            description:
+              'Das freistehende System benötigt keinen Wasseranschluss und lässt sich bei Bedarf einfach umstellen.',
+          },
+          {
+            icon: '/images/icons/icon-time.svg',
+            title: 'Robuster Edelstahl',
+            description:
+              'Das Gehäuse aus lebensmittelechtem AISI-304-Edelstahl ist korrosionsbeständig und langlebig.',
+          },
+          {
+            icon: '/images/icons/icon-approval.svg',
+            title: 'Über 50 Jahre Erfahrung',
+            description:
+              'Phoenix entwickelt seit Jahrzehnten zuverlässige Lösungen für die Wasserfiltration.',
+          },
+          {
+            icon: '/images/icons/icon-glass.svg',
+            title: 'Einfach besserer Geschmack',
+            description:
+              'Die Aktivkohle reduziert störende Geschmacks- und Geruchsstoffe im Leitungswasser.',
           },
         ]}
       />
+
       <GuaranteeSection imageUrl={images[3]?.url || images[0]?.url} />
       <ReviewsCarousel
         reviews={reviews}
         summary={reviewSummary}
-        heading="Erfahrungen unserer Kundinnen und Kunden"
+        heading="Seit über 50 Jahren steht Phoenix für Wasserfiltration"
       />
-      <ProductGalleryStrip images={images} />
-      <FinalCTA imageUrl={images[4]?.url || images[0]?.url} />
+      <ProductFaq />
     </>
   );
 }
@@ -248,7 +286,7 @@ function ReplacementFilterTemplate({
       <ReviewsCarousel
         reviews={reviews}
         summary={reviewSummary}
-        heading="Erfahrungen unserer Kundinnen und Kunden"
+        heading="Seit über 50 Jahren steht Phoenix für Wasserfiltration"
       />
       <ProductGalleryStrip images={images} />
     </>

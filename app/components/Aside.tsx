@@ -43,8 +43,10 @@ export function Aside({
   useEffect(() => {
     const abortController = new AbortController();
     const previouslyFocused = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
 
     if (expanded) {
+      document.body.style.overflow = 'hidden';
       const focusable = () =>
         Array.from(
           dialogRef.current?.querySelectorAll<HTMLElement>(
@@ -76,7 +78,10 @@ export function Aside({
     }
     return () => {
       abortController.abort();
-      if (expanded) previouslyFocused?.focus();
+      if (expanded) {
+        document.body.style.overflow = previousOverflow;
+        previouslyFocused?.focus();
+      }
     };
   }, [close, expanded]);
 

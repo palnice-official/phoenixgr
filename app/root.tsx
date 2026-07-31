@@ -1,4 +1,5 @@
 import {Analytics, getShopAnalytics, useNonce} from '@shopify/hydrogen';
+import {Agentation} from 'agentation';
 import {
   Outlet,
   useRouteError,
@@ -202,6 +203,7 @@ export default function App() {
         <Outlet />
       </PageLayout>
       <ConsentAnalytics gtmId={data.gtmId} />
+      {import.meta.env.DEV && <Agentation />}
     </Analytics.Provider>
   );
 }

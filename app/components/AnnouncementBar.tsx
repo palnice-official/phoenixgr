@@ -32,7 +32,7 @@ export function AnnouncementBar({messages}: {messages: string[]}) {
   return (
     <aside
       aria-label={t.a11y.announcement}
-      className="group overflow-hidden bg-brand-dark text-white"
+      className="announcement-bar group overflow-hidden"
     >
       {/* Scoped keyframes; alternatively move into tailwind.config.ts */}
       <style>{`

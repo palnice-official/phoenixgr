@@ -30,7 +30,12 @@ export function Header({
   publicStoreDomain,
 }: HeaderProps) {
   const {shop, menu} = header;
-  const logo = shop.brand?.logo?.image;
+  const logo = shop.brand?.logo?.image ?? {
+    url: '/images/product-options/phoenix-gravity-logo.png',
+    altText: 'Phoenix Gravity',
+    width: 352,
+    height: 431,
+  };
 
   return (
     <header className="header">
@@ -43,7 +48,7 @@ export function Header({
         prefetch="intent"
         to="/"
       >
-        {logo?.url ? (
+        {logo.url ? (
           <img
             src={logo.url}
             alt={logo.altText || shop.name}

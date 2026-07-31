@@ -6,6 +6,8 @@ import {FeatureSplit} from '~/components/FeatureSplit';
 import {FeatureGrid} from '~/components/FeatureGrid';
 import {ImpactCalculator} from '~/components/ImpactCalculator';
 import {ComparisonTable} from '~/components/ComparisonTable';
+import {AddToCartButton} from '~/components/AddToCartButton';
+import {useAside} from '~/components/Aside';
 import {HowItWorks} from '~/components/HowItWorks';
 import {ThreeSteps} from '~/components/ThreeSteps';
 import {GuaranteeSection} from '~/components/GuaranteeSection';
@@ -196,6 +198,7 @@ const PRODUCT_QUERY = `#graphql
 export default function Homepage() {
   const {product, reviews, reviewSummary, metaobjects, heroVideoUrl, heroPosterUrl} =
     useLoaderData<typeof loader>();
+  const {open} = useAside();
 
   const currentPrice = Number(
     product?.priceRange?.minVariantPrice?.amount ?? 0,
@@ -209,6 +212,9 @@ export default function Homepage() {
       : 0;
 
   const productImages = product?.images?.nodes ?? [];
+  const comparisonVariant = product?.variants.nodes.find(
+    (variant) => variant.availableForSale,
+  );
 
   return (
     <>
@@ -284,7 +290,17 @@ export default function Homepage() {
       <HowItWorks />
 
       {/* 10. Comparison table */}
-      <ComparisonTable rows={metaobjects.comparisonRows} />
+      <ComparisonTable
+        rows={metaobjects.comparisonRows}
+        cta={
+          comparisonVariant ? (
+            <AddToCartButton
+              lines={[{merchandiseId: comparisonVariant.id, quantity: 1}]}
+              onClick={() => open('cart')}
+            />
+          ) : undefined
+        }
+      />
 
       {/* 10. Three steps */}
       <ThreeSteps steps={metaobjects.steps} />

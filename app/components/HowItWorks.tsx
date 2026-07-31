@@ -1,18 +1,18 @@
 const STEPS = [
   {
     image: '/images/how-it-works/fill-upper-chamber.png',
-    title: 'Fill Upper Chamber',
-    body: 'Pour tap water into the upper stainless steel chamber. No electricity or pressure required — gravity does the work.',
+    title: 'Obere Kammer befüllen',
+    body: 'Leitungswasser in die obere Edelstahlkammer füllen. Strom oder Wasserdruck werden nicht benötigt.',
   },
   {
     image: '/images/how-it-works/carbon-filtration.png',
-    title: 'Carbon Filtration',
-    body: 'Activated coconut-shell carbon elements reduce PFAS and pharmaceutical residues based on third-party testing.',
+    title: 'Aktivkohlefiltration',
+    body: 'Das Wasser fließt langsam durch die Aktivkohlefilter auf Kokosnussschalenbasis.',
   },
   {
     image: '/images/how-it-works/pure-water-collected.png',
-    title: 'Pure Water Collected',
-    body: 'Mineral-rich, fluoride-reduced water collects in the lower chamber. No stripping of beneficial minerals — just contaminants removed.',
+    title: 'Wasser entnehmen',
+    body: 'Das gefilterte Wasser sammelt sich in der unteren Kammer und kann direkt über den Edelstahlhahn entnommen werden.',
   },
 ];
 
@@ -22,10 +22,10 @@ export function HowItWorks() {
       <div className="mx-auto max-w-6xl">
         <header className="mb-10 text-center md:mb-14">
           <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-brand-blue">
-            The science behind it
+            Die Technik dahinter
           </p>
           <h2 className="font-display text-3xl font-bold text-brand-dark md:text-4xl">
-            How It Works
+            So funktioniert der Phoenix
           </h2>
         </header>
 
@@ -55,7 +55,7 @@ export function HowItWorks() {
                   />
                 </div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-brand-blue">
-                  Step {number}
+                  Schritt {number}
                 </p>
                 <h3 className="mb-3 text-xl font-semibold text-brand-dark">
                   {step.title}

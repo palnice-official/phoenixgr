@@ -19,10 +19,37 @@ import {ProductForm} from '~/components/ProductForm';
 import {ProductAccordion} from '~/components/ProductAccordion';
 import {StickyMobileBuyBar} from '~/components/StickyMobileBuyBar';
 import {ProductTemplateSections} from '~/components/ProductTemplateSections';
+import {AddToCartButton} from '~/components/AddToCartButton';
+import {useAside} from '~/components/Aside';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {t} from '~/lib/t';
 import {config} from '~/lib/config';
 import {getReviews, getReviewSummary} from '~/lib/reviews.server';
+
+const REFERENCE_PRODUCT_IMAGES = [
+  'filter-carbon-no-stand.webp',
+  'filter-lifestyle-01.webp',
+  'filter-lifestyle-02.webp',
+  'filter-detail-01.webp',
+  'filter-stand.webp',
+  'filter-lifestyle-03.jpg',
+].map((file, index) => ({
+  id: `reference-pdp-${index}`,
+  url: `/images/reference-pdp/${file}`,
+  altText: 'Phoenix Schwerkraft-Wasserfiltersystem',
+}));
+
+const REFERENCE_GALLERY_MEDIA = [
+  REFERENCE_PRODUCT_IMAGES[0],
+  {
+    mediaType: 'video' as const,
+    id: 'reference-pdp-video',
+    url: '/images/reference-pdp/gravity-filter-demo.mp4',
+    poster: '/images/reference-pdp/filter-carbon-no-stand.webp',
+    altText: 'Phoenix Schwerkraft-Wasserfilter im Einsatz',
+  },
+  ...REFERENCE_PRODUCT_IMAGES.slice(1),
+];
 
 export const meta: Route.MetaFunction = ({data}) => {
   const product = data?.product;
@@ -107,6 +134,7 @@ function loadDeferredData({context, params}: Route.LoaderArgs) {
 export default function Product() {
   const {product, reviews, reviewSummary} = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
+  const {open} = useAside();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const selectedVariant = useOptimisticVariant(
@@ -128,7 +156,14 @@ export default function Product() {
     selectedVariant?.gallery?.references?.nodes.flatMap((reference) =>
       reference?.image ? [reference.image] : [],
     ) ?? [];
-  const galleryImages = variantImages.length ? variantImages : images;
+  const isReferenceProduct =
+    product.handle === 'le-filtre-a-eau-par-gravite-phoenix-test';
+  const fallbackImages = isReferenceProduct ? REFERENCE_PRODUCT_IMAGES : images;
+  const galleryImages = variantImages.length
+    ? variantImages
+    : isReferenceProduct
+      ? REFERENCE_GALLERY_MEDIA
+      : fallbackImages;
   const requestedSellingPlanId = searchParams.get('selling_plan');
   const selectedSellingPlan =
     selectedVariant?.sellingPlanAllocations.nodes.find(
@@ -156,6 +191,11 @@ export default function Product() {
       title: t.product.accordions.contents,
       content:
         '<p>Hochwertige Edelstahl-Filteranlage inkl. Kerzenfiltersatz.</p>',
+    },
+    {
+      title: 'Garantie und Probefrist',
+      content:
+        '<p>Testen Sie das Filtersystem 100 Tage lang. F\u00fcr das Edelstahlgeh\u00e4use gilt eine Garantie von 10 Jahren. Es gelten die jeweiligen Garantie- und R\u00fcckgabebedingungen.</p>',
     },
     {
       title: t.product.accordions.shipping,
@@ -234,9 +274,12 @@ export default function Product() {
             </a>
           )}
 
-          <p className="product-market-badge">{t.product.marketBadge}</p>
+          <p className="product-market-badge">
+            <span aria-hidden="true">🇩🇪</span>
+            {t.product.marketBadge}
+          </p>
 
-          {descriptionHtml ? (
+          {!isReferenceProduct && descriptionHtml ? (
             <div
               className="product-intro"
               dangerouslySetInnerHTML={{__html: descriptionHtml}}
@@ -279,9 +322,25 @@ export default function Product() {
         template={product.pageTemplate?.value}
         sections={product.pdpSections}
         variantSteps={selectedVariant?.filtrationSteps}
-        images={images}
+        images={fallbackImages}
         reviews={reviews}
         reviewSummary={reviewSummary}
+        comparisonCta={
+          selectedVariant ? (
+            <AddToCartButton
+              disabled={!isAvailable}
+              lines={[
+                {
+                  merchandiseId: selectedVariant.id,
+                  quantity: 1,
+                  sellingPlanId: selectedSellingPlan?.sellingPlan.id,
+                  selectedVariant,
+                },
+              ]}
+              onClick={() => open('cart')}
+            />
+          ) : undefined
+        }
       />
 
       {/* Sticky mobile buy bar */}
