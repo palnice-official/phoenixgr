@@ -70,7 +70,7 @@ function ContactDetail({
 
 const HOME_MENU = {
   items: [
-    {id: 'shop', title: 'Alle Produkte', url: '/collections/all-products'},
+    {id: 'shop', title: 'Alle Produkte', url: '/collections/all'},
     {
       id: 'system',
       title: 'Das komplette System',
@@ -161,7 +161,7 @@ export function Footer({
   publicStoreDomain,
 }: FooterProps) {
   const logo = header.shop.brand?.logo?.image ?? {
-    url: '/images/phoenix-gravity-logo.png',
+    url: '/images/product-options/phoenix-gravity-logo.png',
     altText: 'Phoenix Gravity',
     width: 352,
     height: 431,

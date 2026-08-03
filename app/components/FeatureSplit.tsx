@@ -8,21 +8,22 @@ interface FeatureImage {
 
 interface FeatureSplitProps {
   imageSide: 'left' | 'right';
-  heading: string;
-  body: ReactNode;
+  heading?: string;
+  body?: ReactNode;
   cta?: {
     text: string;
     href: string;
   };
   imageSrc?: string;
   imageAlt?: string;
+  noPadding?: boolean;
   images?: FeatureImage[];
   video?: VideoHTMLAttributes<HTMLVideoElement> & {
     src: string;
     captionsSrc?: string;
   };
 }
-
+  
 export function FeatureSplit({
   imageSide,
   heading,
@@ -30,30 +31,37 @@ export function FeatureSplit({
   cta,
   imageSrc,
   imageAlt,
+  noPadding = false,
   images,
   video,
 }: FeatureSplitProps) {
   const isLeft = imageSide === 'left';
   const hasGrid = images && images.length > 1;
   const hasMedia = Boolean(video || hasGrid || imageSrc);
+  const hasContent = Boolean(heading || body || cta);
 
   return (
-    <section className="bg-white px-5 py-16 md:py-24">
+    <section
+      className={noPadding ? 'bg-white' : 'bg-white px-5 py-16 md:py-24'}
+    >
       <div className={`mx-auto ${hasMedia ? 'max-w-7xl' : 'max-w-5xl'}`}>
         <div
           className={
-            hasMedia
-              ? `flex flex-col items-center gap-12 ${
+            hasMedia && hasContent
+              ? `flex flex-col items-center gap-12  ${
                   isLeft ? 'md:flex-row' : 'md:flex-row-reverse'
                 }`
               : ''
           }
         >
           {hasMedia && (
-            <div className="w-full md:w-1/2">
+            <div className={hasContent ? 'w-full md:w-1/2' : 'w-full'}>
               {video ? (
                 <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
-                  <FeatureVideo label={imageAlt || heading} video={video} />
+                  <FeatureVideo
+                    label={imageAlt || heading || ''}
+                    video={video}
+                  />
                 </div>
               ) : hasGrid ? (
                 <div className="grid grid-cols-2 gap-3">
@@ -65,40 +73,55 @@ export function FeatureSplit({
                       <img
                         src={img.src}
                         alt={img.alt}
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-contain"
                       />
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
+                <div
+                  className={
+                    hasContent
+                      ? 'relative aspect-[4/3] overflow-hidden rounded-2xl'
+                      : 'overflow-hidden'
+                  }
+                >
                   <img
                     src={imageSrc}
                     alt={imageAlt || ''}
-                    className="h-full w-full object-cover"
+                    className={
+                      hasContent
+                        ? 'h-full w-full object-contain'
+                        : 'block h-auto w-full'
+                    }
                   />
                 </div>
               )}
             </div>
           )}
 
-          {/* Content */}
-          <div className={hasMedia ? 'w-full md:w-1/2' : 'w-full'}>
-            <h2 className="mb-6 font-display text-3xl font-bold text-brand-dark md:text-4xl">
-              {heading}
-            </h2>
-            <div className="mb-8 text-lg leading-relaxed text-neutral-600">
-              {body}
+          {hasContent && (
+            <div className={hasMedia ? 'w-full md:w-1/2' : 'w-full'}>
+              {heading && (
+                <h2 className="mb-6 font-display text-3xl font-bold text-brand-dark md:text-4xl">
+                  {heading}
+                </h2>
+              )}
+              {body && (
+                <div className="mb-8 text-lg leading-relaxed text-neutral-600">
+                  {body}
+                </div>
+              )}
+              {cta && (
+                <Link
+                  to={cta.href}
+                  className="inline-block rounded-full bg-brand-blue px-6 py-3 text-sm font-bold uppercase tracking-wider text-white transition hover:opacity-90"
+                >
+                  {cta.text}
+                </Link>
+              )}
             </div>
-            {cta && (
-              <Link
-                to={cta.href}
-                className="inline-block rounded-full bg-brand-blue px-6 py-3 text-sm font-bold uppercase tracking-wider text-white transition hover:opacity-90"
-              >
-                {cta.text}
-              </Link>
-            )}
-          </div>
+          )}
         </div>
       </div>
     </section>

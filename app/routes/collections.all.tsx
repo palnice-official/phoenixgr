@@ -1,15 +1,44 @@
 import type {Route} from './+types/collections.all';
-import {useLoaderData} from 'react-router';
+import {redirect, useLoaderData} from 'react-router';
 import {getPaginationVariables, Image, Money} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {ProductItem} from '~/components/ProductItem';
 import type {CollectionItemFragment} from 'storefrontapi.generated';
+import {FeatureSplit} from '~/components/FeatureSplit';
+import {BenefitsMarquee} from '~/components/BenefitsMarquee';
+import {
+  CollectionSort,
+  getSortOption,
+  type SortOption,
+} from '~/components/CollectionSort';
+
+const CATALOG_SORTS: Record<SortOption, {sortKey: string; reverse: boolean}> = {
+  featured: {sortKey: 'ID', reverse: false},
+  relevance: {sortKey: 'RELEVANCE', reverse: false},
+  'best-selling': {sortKey: 'BEST_SELLING', reverse: false},
+  'title-ascending': {sortKey: 'TITLE', reverse: false},
+  'title-descending': {sortKey: 'TITLE', reverse: true},
+  'price-ascending': {sortKey: 'PRICE', reverse: false},
+  'price-descending': {sortKey: 'PRICE', reverse: true},
+  'created-ascending': {sortKey: 'CREATED_AT', reverse: false},
+  'created-descending': {sortKey: 'CREATED_AT', reverse: true},
+};
 
 export const meta: Route.MetaFunction = () => {
   return [{title: 'Alle Produkte | Phoenix'}];
 };
 
 export async function loader(args: Route.LoaderArgs) {
+  const url = new URL(args.request.url);
+
+  if (
+    args.request.headers.get('accept')?.includes('text/html') &&
+    (url.searchParams.has('cursor') || url.searchParams.has('direction'))
+  ) {
+    url.searchParams.delete('cursor');
+    url.searchParams.delete('direction');
+    throw redirect(`${url.pathname}${url.search}`);
+  }
   // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
 
@@ -28,10 +57,11 @@ async function loadCriticalData({context, request}: Route.LoaderArgs) {
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 8,
   });
+  const sort = CATALOG_SORTS[getSortOption(request)];
 
   const [{products}] = await Promise.all([
     storefront.query(CATALOG_QUERY, {
-      variables: {...paginationVariables},
+      variables: {...paginationVariables, ...sort},
     }),
     // Add other queries here, so that they are loaded in parallel
   ]);
@@ -52,10 +82,19 @@ export default function Collection() {
 
   return (
     <div className="collection">
-      <h1>Products</h1>
+      {/* <h1>Alle Produkte</h1> */}
+      <FeatureSplit
+        noPadding
+        imageSide="right"
+        imageSrc="/images/collection/view-products.jpg"
+        heading="Alle Produkte"
+      />
+      <BenefitsMarquee />
+      <CollectionSort />
       <PaginatedResourceSection<CollectionItemFragment>
         connection={products}
-        resourcesClassName="products-grid"
+        infiniteScroll
+        resourcesClassName="grid grid-cols-2 gap-6 lg:grid-cols-4"
       >
         {({node: product, index}) => (
           <ProductItem
@@ -105,8 +144,17 @@ const CATALOG_QUERY = `#graphql
     $last: Int
     $startCursor: String
     $endCursor: String
+    $sortKey: ProductSortKeys
+    $reverse: Boolean
   ) @inContext(country: $country, language: $language) {
-    products(first: $first, last: $last, before: $startCursor, after: $endCursor) {
+    products(
+      first: $first,
+      last: $last,
+      before: $startCursor,
+      after: $endCursor,
+      sortKey: $sortKey,
+      reverse: $reverse
+    ) {
       nodes {
         ...CollectionItem
       }

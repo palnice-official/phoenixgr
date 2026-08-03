@@ -1,4 +1,6 @@
 import type {ReactNode} from 'react';
+import { Link } from 'react-router';
+import { config } from '~/lib/config';
 
 interface ComparisonRow {
   label: string;
@@ -42,7 +44,7 @@ export function ComparisonTable({
               <tr className="border-b border-neutral-200 bg-neutral-50">
                 <th
                   scope="col"
-                  className="sticky left-0 z-20 w-44 bg-neutral-50 px-4 py-5 text-left text-sm font-bold text-brand-dark md:w-56 md:px-6 md:text-base"
+                  className="sticky left-0 w-44 bg-neutral-50 px-4 py-5 text-left text-sm font-bold text-brand-dark md:w-56 md:px-6 md:text-base"
                 >
                   Merkmal
                 </th>
@@ -80,7 +82,7 @@ export function ComparisonTable({
                 >
                   <th
                     scope="row"
-                    className="sticky left-0 z-10 bg-white px-4 py-5 text-left text-sm font-semibold text-brand-dark md:px-6 md:text-base"
+                    className="sticky left-0 bg-white px-4 py-5 text-left text-sm font-semibold text-brand-dark md:px-6 md:text-base"
                   >
                     {row.label}
                   </th>
@@ -102,7 +104,12 @@ export function ComparisonTable({
           </table>
         </div>
 
-        {cta && <div className="mx-auto mt-8 max-w-sm">{cta}</div>}
+        {cta && <Link
+              to={`/products/${config.productHandle}`}
+              className="mx-auto mt-8 block w-fit rounded-full bg-brand-blue px-10 py-4 text-center text-sm font-bold uppercase tracking-wider text-white transition hover:opacity-90"
+            >
+              {cta}
+            </Link>}
       </div>
     </section>
   );

@@ -1,6 +1,5 @@
-import type {ReactNode} from 'react';
+import type {ComponentProps, ReactNode} from 'react';
 import {ComparisonTable} from '~/components/ComparisonTable';
-import {FeatureGrid} from '~/components/FeatureGrid';
 import {FeatureSplit} from '~/components/FeatureSplit';
 import {GuaranteeSection} from '~/components/GuaranteeSection';
 import {HowItWorks} from '~/components/HowItWorks';
@@ -12,6 +11,7 @@ import {ThreeSteps} from '~/components/ThreeSteps';
 import {DynamicProductSections} from '~/components/DynamicProductSections';
 import type {Review, ReviewSummary} from '~/lib/reviews.server';
 import {CardsSection} from './CardsSection';
+import {ProductAccordion} from '~/components/ProductAccordion';
 
 interface ProductImage {
   url: string;
@@ -25,6 +25,7 @@ interface ProductTemplateProps {
   reviews: Review[];
   reviewSummary: ReviewSummary | null;
   comparisonCta?: ReactNode;
+  accordionItems: ComponentProps<typeof ProductAccordion>['items'];
 }
 
 interface ProductTemplateSectionsProps extends ProductTemplateProps {
@@ -43,6 +44,7 @@ export function ProductTemplateSections({
   template,
   sections,
   variantSteps,
+  accordionItems,
   ...props
 }: ProductTemplateSectionsProps) {
   const hasDynamicSections = Boolean(
@@ -65,7 +67,7 @@ export function ProductTemplateSections({
     PRODUCT_TEMPLATES[template as keyof typeof PRODUCT_TEMPLATES] ??
     PRODUCT_TEMPLATES.default;
 
-  return <Template {...props} />;
+  return <Template {...props} accordionItems={accordionItems} />;
 }
 
 function WaterFilterTemplate({
@@ -73,9 +75,13 @@ function WaterFilterTemplate({
   reviews,
   reviewSummary,
   comparisonCta,
+  accordionItems,
 }: ProductTemplateProps) {
   return (
     <>
+      {/* Accordions */}
+      <ProductAccordion items={accordionItems} />
+
       <FeatureSplit
         imageSide="right"
         heading="Aktivkohlefiltration für den Alltag"
@@ -100,6 +106,41 @@ function WaterFilterTemplate({
       <ProductRemoves
         heading="Unsere Filter entfernen …"
         items={['Mikroplastik', 'Blei', 'PFAS', 'Chlor', 'Schwermetalle']}
+      />
+
+    <section className="aspect-[3/2] h-auto w-full overflow-hidden">
+    <video
+      autoPlay
+      muted
+      loop
+      playsInline 
+      preload="metadata"
+      className="block h-auto w-full"
+    >
+      <source src="https://cdn.shopify.com/videos/c/o/v/4c32c43c15924de0b503e84991493b60.mp4" type="video/mp4" />
+    </video>
+  </section>
+  <HowItWorks />
+   <FeatureSplit
+        imageSide="right"
+        heading="Aktivkohlefiltration für den Alltag"
+        body={
+          <>
+            <p>
+              Die Filterelemente bestehen aus hochwertiger Aktivkohle auf
+              Kokosnussschalenbasis. Sie verbessern Geschmack und Geruch des
+              Wassers, ohne Strom oder einen festen Wasseranschluss zu benötigen.
+            </p>
+            <p className="mt-6">
+              <strong>Wie funktioniert das?</strong>
+            </p>
+            <p className="mt-6">
+              Das Wasser fließt allein durch die Schwerkraft langsam durch die
+              Filter. Dadurch bleibt ausreichend Kontaktzeit mit der Aktivkohle,
+              bevor das gefilterte Wasser in der unteren Kammer gesammelt wird.
+            </p>
+          </>
+        }
       />
       <FeatureSplit
         imageSide="left"
@@ -137,7 +178,7 @@ function WaterFilterTemplate({
           href: '/products/le-filtre-a-eau-par-gravite-phoenix-test',
         }}
       />
-      <HowItWorks />
+
       <ComparisonTable
         cta={comparisonCta}
         rows={[

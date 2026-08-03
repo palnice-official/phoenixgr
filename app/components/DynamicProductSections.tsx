@@ -1,7 +1,6 @@
 import {Fragment, type ReactNode} from 'react';
 import {RichText} from '@shopify/hydrogen';
 import {ComparisonTable} from '~/components/ComparisonTable';
-import {FeatureGrid} from '~/components/FeatureGrid';
 import {FeatureSplit} from '~/components/FeatureSplit';
 import {GuaranteeSection} from '~/components/GuaranteeSection';
 import {HowItWorks} from '~/components/HowItWorks';
@@ -151,14 +150,7 @@ export function DynamicProductSections({
               text: value(entry.text) || value(entry.body),
             };
           });
-          return (
-            <FeatureGrid
-              key={section.id}
-              heading={value(fields.heading) || undefined}
-              items={items.filter((item) => item.text)}
-              showCta={booleanValue(fields.show_cta, false)}
-            />
-          );
+          
         }
 
         if (type.endsWith('pdp_guarantee')) {

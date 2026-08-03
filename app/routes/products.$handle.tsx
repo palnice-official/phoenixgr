@@ -16,7 +16,6 @@ import {
 } from '@shopify/hydrogen';
 import {ProductImage} from '~/components/ProductImage';
 import {ProductForm} from '~/components/ProductForm';
-import {ProductAccordion} from '~/components/ProductAccordion';
 import {StickyMobileBuyBar} from '~/components/StickyMobileBuyBar';
 import {ProductTemplateSections} from '~/components/ProductTemplateSections';
 import {AddToCartButton} from '~/components/AddToCartButton';
@@ -296,8 +295,6 @@ export default function Product() {
             onSellingPlanChange={selectSellingPlan}
           />
 
-          {/* Accordions */}
-          <ProductAccordion items={accordionItems} />
         </div>
 
         {/* Analytics */}
@@ -322,6 +319,7 @@ export default function Product() {
         template={product.pageTemplate?.value}
         sections={product.pdpSections}
         variantSteps={selectedVariant?.filtrationSteps}
+        accordionItems={accordionItems}
         images={fallbackImages}
         reviews={reviews}
         reviewSummary={reviewSummary}

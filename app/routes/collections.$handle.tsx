@@ -5,11 +5,39 @@ import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {ProductItem} from '~/components/ProductItem';
 import type {ProductItemFragment} from 'storefrontapi.generated';
+import {
+  CollectionSort,
+  getSortOption,
+  type SortOption,
+} from '~/components/CollectionSort';
+
+const COLLECTION_SORTS: Record<
+  SortOption,
+  {sortKey: string; reverse: boolean}
+> = {
+  featured: {sortKey: 'COLLECTION_DEFAULT', reverse: false},
+  relevance: {sortKey: 'RELEVANCE', reverse: false},
+  'best-selling': {sortKey: 'BEST_SELLING', reverse: false},
+  'title-ascending': {sortKey: 'TITLE', reverse: false},
+  'title-descending': {sortKey: 'TITLE', reverse: true},
+  'price-ascending': {sortKey: 'PRICE', reverse: false},
+  'price-descending': {sortKey: 'PRICE', reverse: true},
+  'created-ascending': {sortKey: 'CREATED', reverse: false},
+  'created-descending': {sortKey: 'CREATED', reverse: true},
+};
 
 export const meta: Route.MetaFunction = ({data}) => {
   return [
-    {title: `${data?.collection.seo?.title || data?.collection.title || 'Produkte'} | Phoenix`},
-    {name: 'description', content: data?.collection.seo?.description || data?.collection.description?.slice(0, 160) || ''},
+    {
+      title: `${data?.collection.seo?.title || data?.collection.title || 'Produkte'} | Phoenix`,
+    },
+    {
+      name: 'description',
+      content:
+        data?.collection.seo?.description ||
+        data?.collection.description?.slice(0, 160) ||
+        '',
+    },
   ];
 };
 
@@ -33,6 +61,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 8,
   });
+  const sort = COLLECTION_SORTS[getSortOption(request)];
 
   if (!handle) {
     throw redirect('/collections');
@@ -40,7 +69,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
 
   const [{collection}] = await Promise.all([
     storefront.query(COLLECTION_QUERY, {
-      variables: {handle, ...paginationVariables},
+      variables: {handle, ...paginationVariables, ...sort},
       // Add other queries here, so that they are loaded in parallel
     }),
   ]);
@@ -74,6 +103,7 @@ export default function Collection() {
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
+      <CollectionSort />
       <p className="collection-description">{collection.description}</p>
       <PaginatedResourceSection<ProductItemFragment>
         connection={collection.products}
@@ -137,6 +167,8 @@ const COLLECTION_QUERY = `#graphql
     $last: Int
     $startCursor: String
     $endCursor: String
+    $sortKey: ProductCollectionSortKeys
+    $reverse: Boolean
   ) @inContext(country: $country, language: $language) {
     collection(handle: $handle) {
       id
@@ -151,7 +183,9 @@ const COLLECTION_QUERY = `#graphql
         first: $first,
         last: $last,
         before: $startCursor,
-        after: $endCursor
+        after: $endCursor,
+        sortKey: $sortKey,
+        reverse: $reverse
       ) {
         nodes {
           ...ProductItem
