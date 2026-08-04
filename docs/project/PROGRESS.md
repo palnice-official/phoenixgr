@@ -140,7 +140,7 @@
 
 ## Open questions / blockers
 
-- **[BLOCKER]** Appstle selling-plan allocations are empty through the linked Storefront API. Assign/publish the Appstle plans for this product and Hydrogen storefront before subscription choices can render.
+- Appstle's `Monthly Subscription` plan is available through the linked Storefront API for all 18 product variants; subscription selection and cart creation are verified.
 - Published product is available at handle `le-filtre-a-eau-par-gravite-phoenix-test`, but its Shopify title still includes `(Test)` and its current price is EUR 1,000; correct these catalog values in Admin.
 - Variant gallery contract is implemented but currently unpopulated: create variant metafield `custom.gallery` as `list.file_reference`, allow images, expose it to Storefront, and upload only German-store media. Product media is the active fallback.
 - No Admin API access (token lacks `read_products` scope) — cannot create/modify products via API.

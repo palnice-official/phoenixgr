@@ -8,15 +8,20 @@ import {AddToCartButton} from './AddToCartButton';
 import {useAside} from './Aside';
 import type {ProductFragment} from 'storefrontapi.generated';
 import {t} from '~/lib/t';
-import {useState} from 'react';
+import {useRef, useState} from 'react';
 import {ProductPrice} from './ProductPrice';
-
 
 const OPTION_IMAGES = [
   ['family-1.svg', 'family-3.svg', 'family-5.svg'],
   ['carbon2.png', 'stainless2.png'],
   ['no_stand.png', 'stand_ss.png', 'stand_wooden.png'],
 ].map((images) => images.map((image) => '/images/product-options/' + image));
+
+const SIZE_GUIDES = [
+  '/images/product-options/size-guide-no-stand.jpg',
+  '/images/product-options/size-guide-stainless.jpg',
+  '/images/product-options/size-guide-wood.jpg',
+];
 
 export function ProductForm({
   productOptions,
@@ -31,6 +36,7 @@ export function ProductForm({
 }) {
   const {open} = useAside();
   const [quantity, setQuantity] = useState(1);
+  const sizeGuideRef = useRef<HTMLDialogElement>(null);
 
   const isAvailable = selectedVariant?.availableForSale ?? false;
   const sellingPlans = selectedVariant?.sellingPlanAllocations.nodes ?? [];
@@ -38,6 +44,12 @@ export function ProductForm({
     sellingPlans.find(
       ({sellingPlan}) => sellingPlan.id === selectedSellingPlanId,
     ) ?? null;
+  const standOption = productOptions[2];
+  const selectedStandIndex = Math.max(
+    0,
+    standOption?.optionValues.findIndex(({selected}) => selected) ?? 0,
+  );
+  const selectedStand = standOption?.optionValues[selectedStandIndex]?.name;
 
   return (
     <div className="product-form">
@@ -152,7 +164,40 @@ export function ProductForm({
         <p className={`product-stock-status ${isAvailable ? 'in-stock' : ''}`}>
           {isAvailable ? 'Auf Lager' : t.product.soldOut}
         </p>
+        <button
+          aria-haspopup="dialog"
+          className="product-size-guide-trigger"
+          onClick={() => sizeGuideRef.current?.showModal()}
+          type="button"
+        >
+          Size Guide
+        </button>
       </div>
+
+      <dialog
+        aria-label={
+          selectedStand ? `Size Guide: ${selectedStand}` : 'Size Guide'
+        }
+        className="product-size-guide"
+        ref={sizeGuideRef}
+      >
+        <div className="product-size-guide-content">
+          <button
+            aria-label="Schließen"
+            className="product-size-guide-close"
+            onClick={() => sizeGuideRef.current?.close()}
+            type="button"
+          >
+            &times;
+          </button>
+          <h2>{selectedStand || 'Size Guide'}</h2>
+          <p>Wählen Sie die richtige Größe für Ihren Platz.</p>
+          <img
+            alt={`${selectedStand || 'Product'} Size Guide`}
+            src={SIZE_GUIDES[selectedStandIndex] || SIZE_GUIDES[0]}
+          />
+        </div>
+      </dialog>
 
       {!!sellingPlans.length && onSellingPlanChange && (
         <fieldset className="product-purchase-options">
@@ -201,7 +246,6 @@ export function ProductForm({
           ))}
         </fieldset>
       )}
-
 
       {/* Add to cart */}
       <AddToCartButton
@@ -277,7 +321,6 @@ export function ProductForm({
     </div>
   );
 }
-
 
 function ProductOptionSwatch({
   swatch,

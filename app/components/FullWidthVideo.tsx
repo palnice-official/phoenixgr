@@ -13,8 +13,7 @@ export function FullWidthVideo(
         <section className="w-full">
             <video
                 className=" block w-full h-auto"
-                videoUrl={videoUrl}
-                posterUrl={posterUrl}   
+                poster={posterUrl}   
                 aria-label="Phoenix Gravity Wasserfilter"   
                 autoPlay
                 muted

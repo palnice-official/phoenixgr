@@ -23,7 +23,7 @@ import {useAside} from '~/components/Aside';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {t} from '~/lib/t';
 import {config} from '~/lib/config';
-import {getReviews, getReviewSummary} from '~/lib/reviews.server';
+import {getProductReviewData} from '~/lib/reviews.server';
 
 const REFERENCE_PRODUCT_IMAGES = [
   'filter-carbon-no-stand.webp',
@@ -106,15 +106,14 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
     throw new Error('Expected product handle to be defined');
   }
 
-  const [{product}, reviews, reviewSummary] = await Promise.all([
+  const [{product}, reviewData] = await Promise.all([
     storefront.query(PRODUCT_QUERY, {
       variables: {
         handle,
         selectedOptions: getSelectedProductOptions(request),
       },
     }),
-    getReviews(context.env, {perPage: 8}),
-    getReviewSummary(context.env),
+    getProductReviewData(context.env, handle, {perPage: 8}),
   ]);
 
   if (!product?.id) {
@@ -123,7 +122,11 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
 
   redirectIfHandleIsLocalized(request, {handle, data: product});
 
-  return {product, reviews, reviewSummary};
+  return {
+    product,
+    reviews: reviewData.reviews,
+    reviewSummary: reviewData.summary,
+  };
 }
 
 function loadDeferredData({context, params}: Route.LoaderArgs) {
@@ -273,10 +276,10 @@ export default function Product() {
             </a>
           )}
 
-          <p className="product-market-badge">
+          {/* <p className="product-market-badge">
             <span aria-hidden="true">🇩🇪</span>
             {t.product.marketBadge}
-          </p>
+          </p> */}
 
           {!isReferenceProduct && descriptionHtml ? (
             <div
@@ -294,7 +297,6 @@ export default function Product() {
             selectedSellingPlanId={selectedSellingPlan?.sellingPlan.id ?? null}
             onSellingPlanChange={selectSellingPlan}
           />
-
         </div>
 
         {/* Analytics */}

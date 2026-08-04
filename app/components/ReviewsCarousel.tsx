@@ -18,32 +18,6 @@ import {Link} from 'react-router';
 import type {Review, ReviewSummary} from '~/lib/reviews.server';
 import {t} from '~/lib/t';
 
-const SAMPLE_REVIEWS: Review[] = [
-  {
-    id: 'sample-1',
-    author: 'Anna M.',
-    body: 'Das Wasser schmeckt deutlich frischer und das System war schnell aufgebaut. Wir möchten unseren Phoenix nicht mehr missen.',
-    rating: 5,
-    createdAt: '2026-05-12',
-    verified: true,
-  },
-  {
-    id: 'sample-2',
-    author: 'Michael K.',
-    body: 'Sehr gute Verarbeitung, einfache Bedienung und eine spürbare Verbesserung der Wasserqualität.',
-    rating: 5,
-    createdAt: '2026-04-28',
-    verified: true,
-  },
-  {
-    id: 'sample-3',
-    author: 'Sophie L.',
-    body: 'Die Lieferung war schnell und die Inbetriebnahme unkompliziert. Besonders überzeugt uns der klare Geschmack.',
-    rating: 2,
-    createdAt: '2026-03-19',
-    verified: true,
-  },
-];
 export function ReviewsCarousel({
   reviews,
   summary,
@@ -53,12 +27,16 @@ export function ReviewsCarousel({
   summary: ReviewSummary | null;
   heading: string;
 }) {
-  const displayedReviews = reviews.length ? reviews : SAMPLE_REVIEWS;
   const carouselRef = useRef<HTMLUListElement>(null);
   const scrollbarRef = useRef<HTMLInputElement>(null);
 
+  if (!reviews.length) return null;
+
   return (
-    <section className="overflow-hidden bg-white pb-14 pt-2 md:pb-20 md:pt-2">
+    <section
+      id="reviews"
+      className="overflow-hidden bg-white pb-14 pt-2 md:pb-20 md:pt-2"
+    >
       <div className="mx-auto max-w-[1097px] px-[14px] sm:px-8 md:px-10">
         <div className="max-w-[650px]">
           <Stars rating={summary?.averageRating ?? 5} />
@@ -90,7 +68,7 @@ export function ReviewsCarousel({
             }
           }}
         >
-          {displayedReviews.map((review) => (
+          {reviews.map((review) => (
             <li
               key={review.id}
               className="m-0 box-border flex min-h-[275px] w-full shrink-0 snap-center flex-col rounded-xl bg-[#f6f4f1] p-7 sm:w-[45%] md:min-h-[215px] md:w-[30%] md:p-6"

@@ -71,6 +71,11 @@ export function CartLineItem({
                 </small>
               </li>
             ))}
+            {line.sellingPlanAllocation && (
+              <li>
+                <small>Abo: {line.sellingPlanAllocation.sellingPlan.name}</small>
+              </li>
+            )}
           </ul>
           <CartLineQuantity line={line} />
         </div>

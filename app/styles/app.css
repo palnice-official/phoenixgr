@@ -1006,6 +1006,32 @@ button.reset:hover:not(:has(> *)) {
   max-height: calc(100vh - var(--cart-aside-summary-height-with-discount));
 }
 
+.aside-cart main {
+  height: calc(100vh - var(--header-height) - 2rem);
+}
+
+.aside-cart .cart-main,
+.aside-cart .cart-details {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.aside-cart .cart-main {
+  max-height: none;
+  overflow: hidden;
+}
+
+.aside-cart .cart-details,
+.aside-cart .cart-details > div:first-of-type {
+  flex: 1;
+}
+
+.aside-cart .cart-details > div:first-of-type {
+  min-height: 0;
+  overflow-y: auto;
+}
+
 .cart-line {
   padding: 0.75rem 0;
 }
@@ -1027,10 +1053,8 @@ button.reset:hover:not(:has(> *)) {
 .cart-summary-aside {
   background: white;
   border-top: 1px solid var(--color-dark);
-  bottom: 0;
+  flex-shrink: 0;
   padding-top: 0.75rem;
-  position: absolute;
-  width: calc(var(--aside-width) - 40px);
 }
 
 .cart-line-quantity {
@@ -1726,10 +1750,10 @@ button.reset:hover:not(:has(> *)) {
 
 .product-options--visual .product-options-item {
   border-radius: 50%;
-  height: 5.75rem;
+  height: 4rem;
   min-height: 0;
   padding: 0.5rem;
-  width: 5.75rem;
+  width: 4rem;
 }
 
 .product-options-item:disabled {
@@ -2791,6 +2815,67 @@ body {
   align-items: flex-end;
   display: flex;
   justify-content: space-between;
+}
+
+.product-size-guide-trigger {
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  margin-bottom: 1.55rem;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.product-size-guide {
+  border: 0;
+  border-radius: 0.75rem;
+  box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 25%);
+  max-height: calc(100vh - 2rem);
+  max-width: min(56rem, calc(100vw - 2rem));
+  padding: 0;
+  width: 100%;
+}
+
+.product-size-guide::backdrop {
+  background: rgb(0 0 0 / 65%);
+}
+
+.product-size-guide-content {
+  padding: 1.5rem;
+  position: relative;
+  text-align: center;
+}
+
+.product-size-guide-content h2,
+.product-size-guide-content p {
+  margin: 0 2rem 0.75rem;
+}
+
+.product-size-guide-content img {
+  display: block;
+  max-height: calc(100vh - 10rem);
+  object-fit: contain;
+  width: 100%;
+}
+
+.product-size-guide-close {
+  align-items: center;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  display: flex;
+  font-size: 2rem;
+  height: 2.5rem;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  position: absolute;
+  right: 0.75rem;
+  top: 0.5rem;
+  width: 2.5rem;
 }
 
 .product-stock-status {

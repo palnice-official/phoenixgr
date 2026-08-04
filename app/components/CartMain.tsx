@@ -56,11 +56,11 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
       aria-label={layout === 'page' ? 'Warenkorbseite' : 'Warenkorb'}
     >
       <CartEmpty hidden={linesCount} layout={layout} />
-      {cartHasItems && (
+      {/* {cartHasItems && (
         <FreeShippingBar
           subtotal={Number(cart?.cost?.subtotalAmount?.amount ?? 0)}
         />
-      )}
+      )} */}
       <div className="cart-details">
         <p id="cart-lines" className="sr-only">
           Line items
@@ -107,7 +107,7 @@ function CartEmpty({
         started!
       </p>
       <br />
-      <Link to="/collections" onClick={close} prefetch="viewport">
+      <Link to="/collections/all" onClick={close} prefetch="viewport">
         Continue shopping →
       </Link>
     </div>

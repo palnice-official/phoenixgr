@@ -48,6 +48,7 @@ export type StoreConfig = typeof config;
 export function getEnvConfig(env: Env) {
   return {
     gtmId: env.PUBLIC_GTM_ID ?? '',
+    tidioKey: env.PUBLIC_TIDIO_KEY ?? '',
     canonicalDomain: env.PUBLIC_CANONICAL_DOMAIN ?? '',
     heroVideoUrl: env.PUBLIC_HERO_VIDEO_URL ?? '',
     heroPosterUrl: env.PUBLIC_HERO_POSTER_URL ?? '',
@@ -79,6 +80,7 @@ export function formatEUR(amount: number): string {
 declare global {
   interface Env {
     PUBLIC_GTM_ID?: string;
+    PUBLIC_TIDIO_KEY?: string;
     PUBLIC_CANONICAL_DOMAIN?: string;
     PUBLIC_HERO_VIDEO_URL?: string;
     PUBLIC_HERO_POSTER_URL?: string;

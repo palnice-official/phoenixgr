@@ -18,6 +18,7 @@ import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import {PageLayout} from './components/PageLayout';
 import {ConsentAnalytics} from './components/ConsentAnalytics';
+import {TidioChat} from './components/TidioChat';
 import {getEnvConfig} from './lib/config';
 
 export type RootLoader = typeof loader;
@@ -32,7 +33,13 @@ export const meta: Route.MetaFunction = ({data, location}) => {
         'Edelstahl-Schwerkraft-Wasserfilter für reines Trinkwasser – ohne Strom und ohne Wasseranschluss.',
     },
     ...(canonicalDomain
-      ? [{tagName: 'link', rel: 'canonical', href: `${canonicalDomain}${location.pathname}`}]
+      ? [
+          {
+            tagName: 'link',
+            rel: 'canonical',
+            href: `${canonicalDomain}${location.pathname}`,
+          },
+        ]
       : []),
   ];
 };
@@ -99,13 +106,13 @@ export async function loader(args: Route.LoaderArgs) {
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     canonicalDomain: envConfig.canonicalDomain,
     gtmId: envConfig.gtmId,
+    tidioKey: envConfig.tidioKey,
     shop: getShopAnalytics({
       storefront,
       publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
     }),
     consent: {
-      checkoutDomain:
-        env.PUBLIC_CHECKOUT_DOMAIN ?? env.PUBLIC_STORE_DOMAIN,
+      checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN ?? env.PUBLIC_STORE_DOMAIN,
       storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
       withPrivacyBanner: true,
       // localize the privacy banner
@@ -172,8 +179,14 @@ export function Layout({children}: {children?: React.ReactNode}) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <link rel="stylesheet" href={resetStyles}></link>
-        <link rel="stylesheet" href={appStyles}></link>
+        <link
+          rel="stylesheet"
+          href={import.meta.env.DEV ? `${resetStyles}?direct` : resetStyles}
+        />
+        <link
+          rel="stylesheet"
+          href={import.meta.env.DEV ? `${appStyles}?direct` : appStyles}
+        />
         <Meta />
         <Links />
       </head>
@@ -203,6 +216,7 @@ export default function App() {
         <Outlet />
       </PageLayout>
       <ConsentAnalytics gtmId={data.gtmId} />
+      <TidioChat publicKey={data.tidioKey} />
       {import.meta.env.DEV && <Agentation />}
     </Analytics.Provider>
   );
@@ -218,7 +232,11 @@ export function ErrorBoundary() {
 
   return (
     <div className="route-error">
-      <h1>{errorStatus === 404 ? 'Seite nicht gefunden' : 'Etwas ist schiefgelaufen'}</h1>
+      <h1>
+        {errorStatus === 404
+          ? 'Seite nicht gefunden'
+          : 'Etwas ist schiefgelaufen'}
+      </h1>
       <h2>{errorStatus}</h2>
       <a href="/">Zur Startseite</a>
     </div>

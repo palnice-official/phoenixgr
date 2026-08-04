@@ -21,6 +21,7 @@ import {config} from '~/lib/config';
 import {getReviews, getReviewSummary} from '~/lib/reviews.server';
 import {FullWidthVideo} from '~/components/FullWidthVideo';
 import {CardsSection} from '~/components/CardsSection';
+import {FeatureVideo} from '~/components/FeatureVideo';
 
 const localLabReports = [
   {
@@ -261,7 +262,8 @@ export default function Homepage() {
         body="Herkömmliche Filter fangen Schadstoffe nur ab und lassen sie sich vermehren — innerhalb von zwei Wochen werden sie zu Keimen von Verunreinigungen. Unsere Nanobakterien-Technologie löst dieses Problem: Aktivkohle aus Kokosnussschalen eliminiert Chemikalien, Toxine und Schwermetalle, während spezielle Adsorbentien das Bakterienwachstum im Filter selbst verhindern."
       />
 
-      <BenefitsMarquee />
+      {/* <BenefitsMarquee /> */}
+      <FeatureVideo />
 
       <FeatureSplit
         imageSide="right"

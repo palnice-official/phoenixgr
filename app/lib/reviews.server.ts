@@ -34,6 +34,11 @@ interface JudgeMeReview {
   hidden?: boolean;
   curated?: string;
 }
+interface JudgeMeProduct {
+  id: number;
+  rating?: number;
+  reviews_count?: number;
+}
 
 const JUDGEME_BASE = 'https://judge.me/api/v1';
 
@@ -84,13 +89,79 @@ export async function getReviews(
   }
 }
 
+/** Fetch reviews and the aggregate rating for one Shopify product. */
+export async function getProductReviewData(
+  env: Env,
+  productHandle: string,
+  opts: {perPage?: number; page?: number} = {},
+): Promise<{reviews: Review[]; summary: ReviewSummary | null}> {
+  const auth = judgemeAuth(env);
+  if (!auth) return {reviews: [], summary: null};
+
+  const productParams = new URLSearchParams({
+    api_token: auth.token,
+    shop_domain: auth.shop,
+    handle: productHandle,
+  });
+
+  try {
+    const productRes = await fetch(
+      `${JUDGEME_BASE}/products/-1?${productParams}`,
+      {headers: {Accept: 'application/json'}},
+    );
+    if (!productRes.ok) return {reviews: [], summary: null};
+
+    const {product} = (await productRes.json()) as {
+      product?: JudgeMeProduct;
+    };
+    if (!product?.id) return {reviews: [], summary: null};
+
+    const reviewParams = new URLSearchParams({
+      api_token: auth.token,
+      shop_domain: auth.shop,
+      product_id: String(product.id),
+      published: 'true',
+      per_page: String(opts.perPage ?? 10),
+      page: String(opts.page ?? 1),
+    });
+    const reviewsRes = await fetch(`${JUDGEME_BASE}/reviews?${reviewParams}`, {
+      headers: {Accept: 'application/json'},
+    });
+    if (!reviewsRes.ok) return {reviews: [], summary: null};
+
+    const data = (await reviewsRes.json()) as {reviews?: JudgeMeReview[]};
+    const reviews = (data.reviews ?? [])
+      .filter((review) => !review.hidden && (review.rating ?? 0) > 0)
+      .map((review) => ({
+        id: String(review.id),
+        author: review.reviewer?.name ?? 'Verifizierter Kunde',
+        body: review.body ?? '',
+        rating: review.rating ?? 5,
+        createdAt: review.created_at ?? '',
+        verified: review.verified === 'buyer',
+      }));
+    const summary =
+      typeof product.rating === 'number' && (product.reviews_count ?? 0) > 0
+        ? {
+            averageRating: Math.round(product.rating * 100) / 100,
+            totalCount: product.reviews_count!,
+          }
+        : null;
+
+    return {reviews, summary};
+  } catch {
+    return {reviews: [], summary: null};
+  }
+}
 /**
  * Aggregate rating for the reviews header + JSON-LD structured data.
  * Judge.me exposes shop-level counts via the widget settings endpoint; if the
  * call fails we return null and the UI should hide the aggregate line rather
  * than show fabricated numbers.
  */
-export async function getReviewSummary(env: Env): Promise<ReviewSummary | null> {
+export async function getReviewSummary(
+  env: Env,
+): Promise<ReviewSummary | null> {
   const auth = judgemeAuth(env);
   if (!auth) return null;
 
@@ -100,9 +171,12 @@ export async function getReviewSummary(env: Env): Promise<ReviewSummary | null> 
   });
 
   try {
-    const res = await fetch(`${JUDGEME_BASE}/widgets/product_review?${params}`, {
-      headers: {Accept: 'application/json'},
-    });
+    const res = await fetch(
+      `${JUDGEME_BASE}/widgets/product_review?${params}`,
+      {
+        headers: {Accept: 'application/json'},
+      },
+    );
     if (!res.ok) return null;
     const data = (await res.json()) as {
       average_rating?: number;

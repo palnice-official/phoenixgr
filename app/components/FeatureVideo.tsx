@@ -1,43 +1,59 @@
-const benefits = [
+export type FeatureVideoBenefit = {
+  text: string;
+  icon: string;
+  side: 'left' | 'right';
+};
+
+export type FeatureVideoProps = {
+  videoUrl?: string;
+  posterUrl?: string;
+  ariaLabel?: string;
+  benefits?: readonly FeatureVideoBenefit[];
+};
+
+const defaultBenefits = [
   {
     text: '50+ Years Of Experience',
-    icon: 'icon-experience.svg',
+    icon: '/images/homePage/feature-icons/icon-experience.svg',
     side: 'left',
   },
   {
     text: 'Filter Out 99.9% Of Contaminants',
-    icon: 'icon-water-drop.svg',
+    icon: '/images/homePage/feature-icons/icon-water-drop.svg',
     side: 'right',
   },
   {
     text: 'No Plumbing Required',
-    icon: 'icon-plumbing.svg',
+    icon: '/images/homePage/feature-icons/icon-plumbing.svg',
     side: 'left',
   },
   {
     text: '800k Happy Customers',
-    icon: 'icon-happy.svg',
+    icon: '/images/homePage/feature-icons/icon-happy.svg',
     side: 'right',
   },
   {
     text: '$1,000s Cheaper Than Bottles & In-Home Systems',
-    icon: 'icon-bottle.svg',
+    icon: '/images/homePage/feature-icons/icon-bottle.svg',
     side: 'left',
   },
   {
     text: 'Less than 5 cents Per Gallon',
-    icon: 'icon-scales.svg',
+    icon: '/images/homePage/feature-icons/icon-scales.svg',
     side: 'right',
   },
-] as const;
+] as const satisfies readonly FeatureVideoBenefit[];
 
-const iconPath = (icon: string) => `/images/homePage/feature-icons/${icon}`;
-
-export function FeatureVideo() {
+export function FeatureVideo({
+  videoUrl = '/images/homePage/feature-video.mp4',
+  posterUrl = '/images/homePage/feature-video-poster.jpg',
+  ariaLabel = 'Vorteile des Phoenix Gravity Wasserfilters',
+  benefits = defaultBenefits,
+}: FeatureVideoProps = {}) {
   return (
     <section
       className="-mx-4 w-[calc(100%+2rem)] overflow-hidden bg-[#f7f6f5] p-0"
-      aria-label="Vorteile des Phoenix Gravity Wasserfilters"
+      aria-label={ariaLabel}
     >
       <div className="relative aspect-[1323/651] w-full">
         <video
@@ -46,10 +62,10 @@ export function FeatureVideo() {
           muted
           loop
           playsInline
-          poster="/images/homePage/feature-video-poster.jpg"
+          poster={posterUrl}
           aria-hidden="true"
         >
-          <source src="/images/homePage/feature-video.mp4" type="video/mp4" />
+          <source src={videoUrl} type="video/mp4" />
         </video>
 
         <div className="pointer-events-none absolute inset-0 hidden grid-cols-[30%_40%_30%] md:grid">
@@ -66,7 +82,7 @@ export function FeatureVideo() {
                   </span>
                   <img
                     className="h-[clamp(1.8rem,3.2vw,2.75rem)] w-[clamp(1.8rem,3.2vw,2.75rem)] object-contain"
-                    src={iconPath(icon)}
+                    src={icon}
                     alt=""
                   />
                 </li>
@@ -85,7 +101,7 @@ export function FeatureVideo() {
                 >
                   <img
                     className="h-[clamp(1.8rem,3.2vw,2.75rem)] w-[clamp(1.8rem,3.2vw,2.75rem)] object-contain"
-                    src={iconPath(icon)}
+                    src={icon}
                     alt=""
                   />
                   <span className="max-w-[10rem] text-[clamp(.7rem,1.2vw,1rem)] leading-tight text-[#242329]">
@@ -102,7 +118,7 @@ export function FeatureVideo() {
           <li className="flex items-center gap-3" key={text}>
             <img
               className="h-9 w-9 shrink-0 object-contain"
-              src={iconPath(icon)}
+              src={icon}
               alt=""
             />
             <span className="text-sm leading-tight text-[#242329]">{text}</span>
