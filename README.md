@@ -43,3 +43,44 @@ npm run dev
 ## Setup for using Customer Account API (`/account` section)
 
 Follow step 1 and 2 of <https://shopify.dev/docs/custom-storefronts/building-with-the-customer-account-api/hydrogen#step-1-set-up-a-public-domain-for-local-development>
+
+npx shopify hydrogen login --shop "vf60g5-gc"
+
+  # Display storefronts and confirm the target
+  npx shopify hydrogen list
+
+  # Relink this project to the new store's phonixgr storefront
+  npx shopify hydrogen link --force --storefront "phonixgr"
+
+  # Confirm available Oxygen environments
+  npx shopify hydrogen env list
+
+  # Test the production build
+  npm run build
+
+  # Upload/deploy to Production
+  npx shopify hydrogen deploy --force --env production
+
+  When the last command asks:
+
+  Continue?
+
+  Choose Yes, confirm deploy.
+
+  Optional verification:
+
+  Get-Content -Raw .shopify/project.json
+
+  It should contain:
+
+  {
+    "shop": "vf60g5-gc.myshopify.com",
+    "storefront": {
+      "id": "gid://shopify/HydrogenStorefront/1000163667",
+      "title": "phonixgr"
+    }
+  }
+
+
+
+  

@@ -1,4 +1,4 @@
-import {useLoaderData, data, type HeadersFunction} from 'react-router';
+import {Link, useLoaderData, data, type HeadersFunction} from 'react-router';
 import type {Route} from './+types/cart';
 import type {CartQueryDataReturn} from '@shopify/hydrogen';
 import {CartForm} from '@shopify/hydrogen';
@@ -107,7 +107,18 @@ export default function Cart() {
 
   return (
     <div className="cart">
-      <h1>{t.nav.cart}</h1>
+      <header className="cart-page-heading">
+        <h1>{t.cart.title}</h1>
+        <div className="cart-page-heading-actions">
+          <p className="cart-installments">
+            In 4 zinsfreien Raten bezahlen
+            <span aria-hidden="true">K</span>
+          </p>
+          <Link className="cart-continue-shopping" to="/collections/all">
+            {t.cta.continueShopping}
+          </Link>
+        </div>
+      </header>
       <CartMain layout="page" cart={cart} />
     </div>
   );

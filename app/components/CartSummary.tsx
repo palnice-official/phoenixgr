@@ -14,14 +14,12 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
   const className =
     layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside';
   const summaryId = useId();
-  const discountsHeadingId = useId();
-  const discountCodeInputId = useId();
-  const giftCardHeadingId = useId();
-  const giftCardInputId = useId();
 
   return (
     <div aria-labelledby={summaryId} className={className}>
-      <h4 id={summaryId}>Summe</h4>
+      <h4 id={summaryId} className={layout === 'aside' ? 'sr-only' : undefined}>
+        Summe
+      </h4>
       <dl role="group" className="cart-subtotal">
         <dt>Zwischensumme</dt>
         <dd>
@@ -36,32 +34,39 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
         {t.price.taxNote}{' '}
         <Link to={t.price.shippingPagePath}>{t.price.taxNoteShippingWord}</Link>
       </p>
-      <CartDiscounts
-        discountCodes={cart?.discountCodes}
-        discountsHeadingId={discountsHeadingId}
-        discountCodeInputId={discountCodeInputId}
-      />
-      {layout === 'page' && (
-        <CartGiftCard
-          giftCardCodes={cart?.appliedGiftCards}
-          giftCardHeadingId={giftCardHeadingId}
-          giftCardInputId={giftCardInputId}
-        />
-      )}
-      <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} />
+      <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} layout={layout} />
     </div>
   );
 }
 
-function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
+function CartCheckoutActions({
+  checkoutUrl,
+  layout,
+}: {
+  checkoutUrl?: string;
+  layout: CartLayout;
+}) {
   if (!checkoutUrl) return null;
 
   return (
-    <div>
-      <a href={checkoutUrl} target="_self">
-        <p>{t.cta.checkout} &rarr;</p>
+    <div className="cart-checkout-actions">
+      <div className="cart-payment-panel">
+        <p className="cart-checkout-note">
+          {layout === 'page'
+            ? t.cart.checkoutNote
+            : 'Sicher und schnell bezahlen'}
+        </p>
+        <ul className="cart-payment-list" aria-label="Zahlungsarten">
+          {['AMEX', 'Apple Pay', 'PayPal', 'Visa', 'Mastercard', 'Klarna'].map(
+            (method) => (
+              <li key={method}>{method}</li>
+            ),
+          )}
+        </ul>
+      </div>
+      <a className="cart-checkout-button" href={checkoutUrl} target="_self">
+        {t.cta.checkout}
       </a>
-      <br />
     </div>
   );
 }

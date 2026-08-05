@@ -296,6 +296,12 @@ export default function Product() {
             selectedVariant={selectedVariant}
             selectedSellingPlanId={selectedSellingPlan?.sellingPlan.id ?? null}
             onSellingPlanChange={selectSellingPlan}
+            showSizeGuide={
+              !product.pdpSections?.references?.nodes.length &&
+              !['replacement-filter', 'accessories'].includes(
+                product.pageTemplate?.value ?? 'default',
+              )
+            }
           />
         </div>
 

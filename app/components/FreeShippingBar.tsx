@@ -17,33 +17,26 @@ export function FreeShippingBar({subtotal}: {subtotal: number}) {
   const pct = Math.min(100, Math.round((subtotal / threshold) * 100));
 
   return (
-    <div className="border-b border-neutral-200 px-5 py-4">
-      <p
-        aria-live="polite"
-        className={`mb-2 text-sm font-medium ${
-          unlocked ? 'text-emerald-700' : 'text-neutral-800'
-        }`}
-      >
+    <div className={`cart-shipping-bar ${unlocked ? 'is-unlocked' : ''}`}>
+      <p aria-live="polite">
+        {unlocked && <span className="cart-shipping-check">✓</span>}
         {unlocked
           ? t.cart.freeShippingUnlocked
           : t.cart.freeShippingRemaining(formatEUR(remaining))}
       </p>
 
-      <div
-        role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={pct}
-        aria-label={t.cart.title}
-        className="h-2 w-full overflow-hidden rounded-full bg-neutral-200"
-      >
+      {!unlocked && (
         <div
-          className={`h-full rounded-full transition-[width] duration-500 ease-out ${
-            unlocked ? 'bg-emerald-600' : 'bg-brand-blue'
-          }`}
-          style={{width: `${pct}%`}}
-        />
-      </div>
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={pct}
+          aria-label={t.cart.title}
+          className="cart-shipping-progress"
+        >
+          <span style={{width: `${pct}%`}} />
+        </div>
+      )}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import {useAside} from '~/components/Aside';
 import {CartLineItem, type CartLine} from '~/components/CartLineItem';
 import {CartSummary} from './CartSummary';
 import {FreeShippingBar} from './FreeShippingBar';
+import {t} from '~/lib/t';
 
 export type CartLayout = 'page' | 'aside';
 
@@ -47,7 +48,7 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
     cart &&
     Boolean(cart?.discountCodes?.filter((code) => code.applicable)?.length);
   const className = `cart-main ${withDiscount ? 'with-discount' : ''}`;
-  const cartHasItems = cart?.totalQuantity ? cart.totalQuantity > 0 : false;
+  const cartHasItems = linesCount;
   const childrenMap = getLineItemChildrenMap(cart?.lines?.nodes ?? []);
 
   return (
@@ -56,16 +57,23 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
       aria-label={layout === 'page' ? 'Warenkorbseite' : 'Warenkorb'}
     >
       <CartEmpty hidden={linesCount} layout={layout} />
-      {/* {cartHasItems && (
+      {layout === 'aside' && cartHasItems && (
         <FreeShippingBar
           subtotal={Number(cart?.cost?.subtotalAmount?.amount ?? 0)}
         />
-      )} */}
-      <div className="cart-details">
+      )}
+      <div className={`cart-details cart-details-${layout}`}>
         <p id="cart-lines" className="sr-only">
           Line items
         </p>
         <div>
+          {layout === 'page' && cartHasItems && (
+            <div className="cart-table-heading" aria-hidden="true">
+              <span>Produkt</span>
+              <span>Menge</span>
+              <span>Zwischensumme</span>
+            </div>
+          )}
           <ul aria-labelledby="cart-lines">
             {(cart?.lines?.nodes ?? []).map((line) => {
               // we do not render non-parent lines at the root of the cart
@@ -86,9 +94,29 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
             })}
           </ul>
         </div>
+        {layout === 'aside' && cartHasItems && <CartTrustStrip />}
         {cartHasItems && <CartSummary cart={cart} layout={layout} />}
       </div>
     </section>
+  );
+}
+
+function CartTrustStrip() {
+  const benefits = [
+    ['icon-experience.svg', '50+ Jahre Erfahrung'],
+    ['icon-water-drop.svg', 'Filtert 99,9 % der Verunreinigungen'],
+    ['icon-happy.svg', '800.000+ zufriedene Kunden'],
+  ];
+
+  return (
+    <ul className="cart-trust-strip" aria-label="Ihre Vorteile">
+      {benefits.map(([icon, label]) => (
+        <li key={icon}>
+          <img src={`/images/homePage/feature-icons/${icon}`} alt="" />
+          <span>{label}</span>
+        </li>
+      ))}
+    </ul>
   );
 }
 

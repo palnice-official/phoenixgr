@@ -28,11 +28,13 @@ export function ProductForm({
   selectedVariant,
   selectedSellingPlanId = null,
   onSellingPlanChange,
+  showSizeGuide = false,
 }: {
   productOptions: MappedProductOptions[];
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
   selectedSellingPlanId?: string | null;
   onSellingPlanChange?: (sellingPlanId: string | null) => void;
+  showSizeGuide?: boolean;
 }) {
   const {open} = useAside();
   const [quantity, setQuantity] = useState(1);
@@ -164,40 +166,44 @@ export function ProductForm({
         <p className={`product-stock-status ${isAvailable ? 'in-stock' : ''}`}>
           {isAvailable ? 'Auf Lager' : t.product.soldOut}
         </p>
-        <button
-          aria-haspopup="dialog"
-          className="product-size-guide-trigger"
-          onClick={() => sizeGuideRef.current?.showModal()}
-          type="button"
-        >
-          Size Guide
-        </button>
-      </div>
-
-      <dialog
-        aria-label={
-          selectedStand ? `Size Guide: ${selectedStand}` : 'Size Guide'
-        }
-        className="product-size-guide"
-        ref={sizeGuideRef}
-      >
-        <div className="product-size-guide-content">
+        {showSizeGuide && (
           <button
-            aria-label="Schließen"
-            className="product-size-guide-close"
-            onClick={() => sizeGuideRef.current?.close()}
+            aria-haspopup="dialog"
+            className="product-size-guide-trigger"
+            onClick={() => sizeGuideRef.current?.showModal()}
             type="button"
           >
-            &times;
+            Size Guide
           </button>
-          <h2>{selectedStand || 'Size Guide'}</h2>
-          <p>Wählen Sie die richtige Größe für Ihren Platz.</p>
-          <img
-            alt={`${selectedStand || 'Product'} Size Guide`}
-            src={SIZE_GUIDES[selectedStandIndex] || SIZE_GUIDES[0]}
-          />
-        </div>
-      </dialog>
+        )}
+      </div>
+
+      {showSizeGuide && (
+        <dialog
+          aria-label={
+            selectedStand ? `Size Guide: ${selectedStand}` : 'Size Guide'
+          }
+          className="product-size-guide"
+          ref={sizeGuideRef}
+        >
+          <div className="product-size-guide-content">
+            <button
+              aria-label="Schließen"
+              className="product-size-guide-close"
+              onClick={() => sizeGuideRef.current?.close()}
+              type="button"
+            >
+              &times;
+            </button>
+            <h2>{selectedStand || 'Size Guide'}</h2>
+            <p>Wählen Sie die richtige Größe für Ihren Platz.</p>
+            <img
+              alt={`${selectedStand || 'Product'} Size Guide`}
+              src={SIZE_GUIDES[selectedStandIndex] || SIZE_GUIDES[0]}
+            />
+          </div>
+        </dialog>
+      )}
 
       {!!sellingPlans.length && onSellingPlanChange && (
         <fieldset className="product-purchase-options">
